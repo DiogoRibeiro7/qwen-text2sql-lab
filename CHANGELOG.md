@@ -59,6 +59,13 @@ changes.
   suppression is covered. The guards — malformed configuration, single-database
   splits, empty evaluations, a reference query that does not run, an empty
   schema, non-object JSONL lines — were the least-covered code in the package.
+- Tests for the experiment orchestration — `pipeline.generate_and_evaluate` and
+  the `prepare-bird` and `train` CLI subcommands — taking total coverage to 90%,
+  with `pipeline.py` complete and `cli.py` at 98%. Only the model call is faked;
+  the loop, the limit handling, the three output files and the metrics run for
+  real against a real SQLite database. `train_adapter` is deliberately not
+  covered: faking `datasets`, `peft`, `trl` and the model would leave a test
+  that exercises only the mocks.
 - `make format`, `make format-check`, `make build` and `make clean` targets.
 - Committed `poetry.lock` resolving all 109 transitive dependencies, so
   `poetry install` reproduces an identical environment. CI verifies the lock
