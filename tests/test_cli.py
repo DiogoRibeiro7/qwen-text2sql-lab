@@ -253,6 +253,8 @@ def test_evaluate_rejects_a_prediction_for_an_unknown_example(
     data, predictions, output = _write_evaluation_inputs(
         tmp_path, make_prepared_row, [{"example_id": "not-in-dataset", "prediction": GOLD_SQL}]
     )
-    with pytest.raises(KeyError, match="not-in-dataset"):
+    with pytest.raises(KeyError) as excinfo:
         _run_evaluate(data, predictions, output)
+    # A bare dict lookup would also mention the id; assert the explanation.
+    assert "unknown example_id" in str(excinfo.value)
     assert not output.exists()

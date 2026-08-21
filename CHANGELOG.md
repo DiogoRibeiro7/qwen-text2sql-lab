@@ -94,9 +94,13 @@ changes.
   before the release rather than after, since it does not backfill.
 - `make release-check`, verifying that `pyproject.toml`, `CITATION.cff` and
   `.zenodo.json` agree on version, title, licence and ORCID, and that the ORCID
-  passes its check digit. Zenodo reads the metadata
-  at the instant a release is published and mints a DOI from it, so a version
-  stale by one bump is archived permanently and cannot be corrected afterwards.
+  passes its check digit. Zenodo reads the metadata at the instant a release is
+  published and mints a DOI from it, so a version stale by one bump is archived
+  permanently and cannot be corrected afterwards.
+- `pipeline.prediction_row`, `pipeline.evaluate_prediction_rows` and
+  `pipeline.apply_limit`: single definitions of the prediction schema, the
+  prediction/example pairing and the limit guard. The scripts and the CLI had
+  each reimplemented these, and the copies had drifted; they now delegate.
 - `make format`, `make format-check`, `make build` and `make clean` targets.
 - Committed `poetry.lock` resolving all 109 transitive dependencies, so
   `poetry install` reproduces an identical environment. CI verifies the lock
@@ -140,6 +144,20 @@ changes.
   normalisation.
 
 ### Fixed
+
+- **Prediction files had two schemas.** `scripts/generate_predictions.py` omitted
+  `difficulty` from its rows while `pipeline.generate_and_evaluate` included it,
+  so whether a prediction file could be stratified by difficulty depended on
+  which entry point produced it.
+- **`generate_predictions.py --limit` was quietly destructive.** `--limit 0`
+  wrote an empty predictions file and `--limit -1` silently dropped the last
+  example, where the library refuses both. The limit is now validated before the
+  multi-gigabyte checkpoint download rather than after.
+- **`evaluate_predictions.py` raised a bare `KeyError`** for a prediction whose
+  example was absent, where the CLI names the offending id. Scoring a mismatched
+  pairing would corrupt every reported metric.
+- `evaluate_predictions.py` wrote its metrics file without an explicit encoding,
+  the only such write in the repository.
 
 - **The learning-curve sweep ignored the configured LoRA rank.**
   `scripts/run_sweep.py` called `learning_curve_plan` without passing a rank, so
