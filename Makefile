@@ -31,8 +31,8 @@ format-check: ## Verify formatting without modifying files
 lint: ## Run Ruff lint rules
 	$(RUN) ruff check $(SOURCES)
 
-typecheck: ## Run mypy in strict mode
-	$(RUN) mypy src/qwen_text2sql
+typecheck: ## Run mypy in strict mode over the package and the entry-point scripts
+	$(RUN) mypy src/qwen_text2sql scripts
 
 test: ## Run the test suite with branch coverage
 	$(RUN) pytest --cov=qwen_text2sql --cov-report=term-missing
