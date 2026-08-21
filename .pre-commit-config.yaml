@@ -55,7 +55,7 @@ repos:
       # not fully provisioned.
       - id: mypy-strict
         name: mypy --strict
-        entry: mypy src/qwen_text2sql
+        entry: mypy src/qwen_text2sql scripts
         language: system
         types: [python]
         pass_filenames: false

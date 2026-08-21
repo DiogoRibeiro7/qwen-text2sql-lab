@@ -76,7 +76,7 @@ jobs:
           python -m pip install "mypy==${MYPY_VERSION}" types-PyYAML pandas-stubs numpy pandas matplotlib
           python -m pip install -e . --no-deps
       - name: Mypy (strict)
-        run: mypy src/qwen_text2sql
+        run: mypy src/qwen_text2sql scripts
 
   test:
     name: Test (Python ${{ matrix.python-version }})

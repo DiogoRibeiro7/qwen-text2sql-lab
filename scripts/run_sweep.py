@@ -52,7 +52,10 @@ def main() -> None:
     base = load_config(args.config)
     total = sum(1 for _ in read_jsonl(args.train_data))
     if args.kind == "learning_curve":
-        cells = learning_curve_plan(total, seed=base.training.seed)
+        # rank must come from the config. Left to its default the sweep would run
+        # at rank 16 whatever the config asked for, so the curve would describe a
+        # model the configured LoRA and QLoRA runs never trained.
+        cells = learning_curve_plan(total, rank=base.lora.rank, seed=base.training.seed)
     else:
         cells = rank_ablation_plan(seed=base.training.seed)
     sweep_root = args.results_root / args.kind

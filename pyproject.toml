@@ -110,6 +110,15 @@ implicit_reexport = true
 # `peft.prepare_model_for_kbit_training` is untyped upstream. Scoped to the one
 # module that calls it so the rest of the package stays fully strict.
 [[tool.mypy.overrides]]
+module = ["nbformat.*"]
+ignore_missing_imports = true
+follow_untyped_imports = true
+
+[[tool.mypy.overrides]]
+module = ["validate_notebooks"]
+disallow_untyped_calls = false
+
+[[tool.mypy.overrides]]
 module = ["qwen_text2sql.training.modeling"]
 disallow_untyped_calls = false
 

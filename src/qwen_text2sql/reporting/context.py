@@ -160,7 +160,7 @@ def _artifacts() -> dict[str, Artifact]:
         ),
         Artifact(
             "learning_curve_summary",
-            "results/learning_curve_summary.csv",
+            "results/sweeps/learning_curve/summary.csv",
             "Per-cell summary of the training-set-size sweep",
             "poetry run python scripts/run_sweep.py --kind learning_curve \\\n"
             "      --config configs/qwen35_4b_qlora.yaml \\\n"
@@ -169,7 +169,7 @@ def _artifacts() -> dict[str, Artifact]:
         ),
         Artifact(
             "rank_ablation_summary",
-            "results/rank_ablation_summary.csv",
+            "results/sweeps/rank_ablation/summary.csv",
             "Per-cell summary of the LoRA rank sweep",
             "poetry run python scripts/run_sweep.py --kind rank_ablation \\\n"
             "      --config configs/qwen35_4b_qlora.yaml \\\n"

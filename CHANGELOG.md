@@ -76,10 +76,17 @@ changes.
   Qwen3.5 checkpoint, tokenizer, TRL trainer and PEFT, from prepared JSONL to a
   saved adapter that is loaded back and used to generate. Nothing is faked; the
   checkpoint is built in memory rather than downloaded, so it runs on CPU in
-  about two seconds. It caught the `warmup_ratio` regression in
-  development, before the fix had landed on the branch, and it holds the repository to its promise that only adapter
-  artifacts are written. `training/train.py` reaches complete coverage,
+  about two seconds. It caught the `warmup_ratio` regression during development,
+  before the fix had landed on its branch, and it holds the repository to its
+  promise that only adapter artifacts are written. `training/train.py` reaches complete coverage,
   `training/modeling.py` 10% to 49%, and the repository total to 95%.
+- Tests for the sweep driver, which had none, and `scripts/` is now type checked
+  alongside the package by `make typecheck`, CI and the pre-push hook. These are
+  the documented entry points for every experiment in the README; every defect
+  above was living in code that no gate covered.
+- `scripts/plan_experiments.py` takes an optional `--config`, so the written plan
+  describes the runs the sweep will actually perform rather than the planning
+  defaults.
 - `make format`, `make format-check`, `make build` and `make clean` targets.
 - Committed `poetry.lock` resolving all 109 transitive dependencies, so
   `poetry install` reproduces an identical environment. CI verifies the lock
@@ -123,6 +130,17 @@ changes.
   normalisation.
 
 ### Fixed
+
+- **The learning-curve sweep ignored the configured LoRA rank.**
+  `scripts/run_sweep.py` called `learning_curve_plan` without passing a rank, so
+  every cell trained at the planning default of 16 whatever the config asked for.
+  A curve measured at rank 16 cannot be compared with the LoRA or QLoRA runs it
+  exists to contextualise, and nothing announced the substitution.
+- **The sweep wrote its summary where nothing read it.** `run_sweep.py` writes
+  `results/sweeps/<kind>/summary.csv`; the analysis notebooks looked for
+  `results/<kind>_summary.csv`. A multi-hour sweep would finish and the notebook
+  would report its input missing. The artifact registry now points at the path
+  the sweep actually writes.
 
 - **Training could not run at all.** `train_adapter` passed `warmup_ratio` to
   `trl.SFTConfig`, but transformers 5 removed that argument from
