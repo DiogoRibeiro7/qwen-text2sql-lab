@@ -1,0 +1,53 @@
+name: Experiment proposal
+description: Propose a new experiment, ablation or evaluation to run.
+labels: ["experiment", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this for scientific proposals rather than code defects. See
+        `docs/research_protocol.md` for the rules an experiment must respect.
+  - type: textarea
+    id: question
+    attributes:
+      label: Research question
+      description: State it as a single falsifiable question.
+    validations:
+      required: true
+  - type: textarea
+    id: design
+    attributes:
+      label: Design
+      description: Conditions compared, what is held fixed, and the number of runs or seeds.
+    validations:
+      required: true
+  - type: input
+    id: endpoint
+    attributes:
+      label: Primary endpoint
+      placeholder: "e.g. execution accuracy on the database-disjoint validation split"
+    validations:
+      required: true
+  - type: textarea
+    id: confounds
+    attributes:
+      label: Confounds and controls
+      description: What could produce the expected result for the wrong reason?
+    validations:
+      required: true
+  - type: checkboxes
+    id: integrity
+    attributes:
+      label: Research integrity
+      options:
+        - label: No hyperparameter or decoding choice is selected on a final evaluation set.
+          required: true
+        - label: Train/validation partitions remain database-disjoint.
+          required: true
+        - label: Reported differences will include an uncertainty estimate.
+          required: true
+  - type: textarea
+    id: cost
+    attributes:
+      label: Expected compute cost
+      description: Rough GPU hours and storage required.

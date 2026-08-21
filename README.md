@@ -1,5 +1,12 @@
 # Qwen Text-to-SQL Lab
 
+[![CI](https://github.com/DiogoRibeiro7/qwen-text2sql-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/DiogoRibeiro7/qwen-text2sql-lab/actions/workflows/ci.yml)
+[![Python 3.11 | 3.12 | 3.13](https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13-blue.svg)](pyproject.toml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![Typed: mypy strict](https://img.shields.io/badge/mypy-strict-2a6db2.svg)](https://mypy-lang.org/)
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
+
 A reproducible research repository for adapting **Qwen3.5-4B** to text-to-SQL with **LoRA** and **QLoRA**, then evaluating whether task-specific fine-tuning improves executable SQL generation.
 
 The repository is built around one primary question:
@@ -133,7 +140,7 @@ Treat this as an external evaluation set: do not choose learning rates, LoRA ran
 Generate SQL before fine-tuning:
 
 ```bash
-PYTHONPATH=src poetry run python scripts/generate_predictions.py \
+poetry run python scripts/generate_predictions.py \
   --config configs/baseline.yaml \
   --data data/processed/bird_validation.jsonl \
   --output results/predictions/baseline_validation.jsonl
@@ -142,7 +149,7 @@ PYTHONPATH=src poetry run python scripts/generate_predictions.py \
 Evaluate by execution:
 
 ```bash
-PYTHONPATH=src poetry run python scripts/evaluate_predictions.py \
+poetry run python scripts/evaluate_predictions.py \
   --data data/processed/bird_validation.jsonl \
   --predictions results/predictions/baseline_validation.jsonl \
   --records-output results/baseline_validation_records.jsonl \
@@ -152,7 +159,7 @@ PYTHONPATH=src poetry run python scripts/evaluate_predictions.py \
 ## LoRA fine-tuning
 
 ```bash
-PYTHONPATH=src poetry run python scripts/train_adapter.py \
+poetry run python scripts/train_adapter.py \
   --config configs/qwen35_4b_lora.yaml \
   --train-data data/processed/bird_train.jsonl \
   --validation-data data/processed/bird_validation.jsonl
@@ -163,7 +170,7 @@ Only PEFT adapter artifacts are written to the configured checkpoint directory.
 Generate adapted predictions:
 
 ```bash
-PYTHONPATH=src poetry run python scripts/generate_predictions.py \
+poetry run python scripts/generate_predictions.py \
   --config configs/qwen35_4b_lora.yaml \
   --adapter results/checkpoints/qwen35_4b_lora/adapter \
   --data data/processed/bird_validation.jsonl \
@@ -175,7 +182,7 @@ PYTHONPATH=src poetry run python scripts/generate_predictions.py \
 The QLoRA configuration loads the text model in 4-bit NF4, prepares it for k-bit training, then trains LoRA parameters over linear modules.
 
 ```bash
-PYTHONPATH=src poetry run python scripts/train_adapter.py \
+poetry run python scripts/train_adapter.py \
   --config configs/qwen35_4b_qlora.yaml \
   --train-data data/processed/bird_train.jsonl \
   --validation-data data/processed/bird_validation.jsonl
@@ -202,7 +209,7 @@ This gives the decomposition:
 Create the planned experiment matrix:
 
 ```bash
-PYTHONPATH=src poetry run python scripts/plan_experiments.py \
+poetry run python scripts/plan_experiments.py \
   --train-data data/processed/bird_train.jsonl \
   --output results/experiment_plan.csv
 ```
@@ -212,7 +219,7 @@ The machine-readable plan prevents silently dropping a training-set size or LoRA
 Run either sweep end to end with:
 
 ```bash
-PYTHONPATH=src poetry run python scripts/run_sweep.py \
+poetry run python scripts/run_sweep.py \
   --kind learning_curve \
   --config configs/qwen35_4b_qlora.yaml \
   --train-data data/processed/bird_train.jsonl \
@@ -226,7 +233,7 @@ Use `--kind rank_ablation` for the adapter-rank experiment. The sweep writes a p
 After evaluating two models on the same examples:
 
 ```bash
-PYTHONPATH=src poetry run python scripts/compare_models.py \
+poetry run python scripts/compare_models.py \
   --first results/baseline_validation_records.jsonl \
   --second results/lora_validation_records.jsonl \
   --n-bootstrap 10000 \
@@ -257,11 +264,23 @@ Reusable implementation lives under `src/`; notebooks orchestrate, inspect and v
 ## Quality gates
 
 ```bash
-make lint
-make typecheck
-make test
-make notebooks
+make check      # lint + format-check + typecheck + test
+make notebooks  # static notebook validation
 ```
+
+Individual targets are listed by `make help`. Install the git hooks once with
+`make hooks` so formatting and the large-file guard run on every commit.
+
+| Gate | Enforces |
+|---|---|
+| `make lint` | Ruff rules `E`, `F`, `I`, `UP`, `B`, `SIM`, `RUF`, notebooks included |
+| `make format-check` | Ruff formatting (`make format` fixes) |
+| `make typecheck` | `mypy --strict` over `src/qwen_text2sql` |
+| `make test` | pytest with branch coverage |
+| `make notebooks` | every notebook cell compiles and carries no committed outputs |
+
+CI runs all of these on Python 3.11, 3.12 and 3.13, and additionally builds and
+metadata-checks the distribution.
 
 CI intentionally does not download model weights or BIRD databases. Unit tests build small temporary SQLite databases and verify schema extraction, read-only execution, result equivalence, splitting, formatting, metrics and bootstrap logic.
 
@@ -297,6 +316,25 @@ tests/               unit and regression tests
 - PEFT quantization guide: https://huggingface.co/docs/peft/developer_guides/quantization
 - BIRD filtered training data: https://huggingface.co/datasets/birdsql/bird23-train-filtered
 - BIRD revised development data: https://huggingface.co/datasets/birdsql/bird_sql_dev_20251106
+
+## Contributing
+
+Contributions are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md), which
+covers the development setup, the quality gates, and the research-integrity
+rules a change to the experimental protocol must respect. Participation is
+governed by the [Code of Conduct](CODE_OF_CONDUCT.md).
+
+Security vulnerabilities must be reported privately — see
+[SECURITY.md](SECURITY.md). Note that this project executes model-generated SQL
+in order to score it; run evaluation against copies of benchmark databases, never
+against a database holding real data.
+
+Released changes are recorded in [CHANGELOG.md](CHANGELOG.md).
+
+## Citation
+
+If you use this repository, cite it using the metadata in
+[CITATION.cff](CITATION.cff), or via the "Cite this repository" button on GitHub.
 
 ## License
 

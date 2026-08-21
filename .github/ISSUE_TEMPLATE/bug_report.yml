@@ -1,0 +1,59 @@
+name: Bug report
+description: Something in the code, CLI or pipeline behaves incorrectly.
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please do not paste BIRD database contents, model weights or private data.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: Describe the incorrect behaviour and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction
+      description: The exact command(s) you ran, including the config file used.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Error output
+      description: Full traceback or relevant log excerpt.
+      render: shell
+  - type: input
+    id: version
+    attributes:
+      label: Project version or commit
+      placeholder: "0.1.0 or a commit SHA"
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected area
+      options:
+        - Data preparation (prepare-bird, splits, schema)
+        - Training (LoRA / QLoRA)
+        - Inference / generation
+        - Execution evaluation / metrics
+        - Statistics (bootstrap, comparisons)
+        - Sweeps and experiment planning
+        - Notebooks
+        - Tooling / CI / packaging
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Python version, OS, GPU/CUDA if relevant, and key package versions.
+      render: shell
+    validations:
+      required: true
