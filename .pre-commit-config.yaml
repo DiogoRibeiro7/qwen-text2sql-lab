@@ -1,16 +1,40 @@
+# Fast, dependency-light gates that run on every commit.
+# The full gate set (including mypy) is `make check`; CI runs both.
+default_language_version:
+  python: python3.11
+
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.12.11
+    rev: v0.16.1
     hooks:
       - id: ruff-check
         args: [--fix]
       - id: ruff-format
+
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
       - id: check-yaml
       - id: check-toml
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: debug-statements
+      - id: detect-private-key
+      - id: mixed-line-ending
+        args: [--fix=lf]
       - id: end-of-file-fixer
+        exclude: \.ipynb$
       - id: trailing-whitespace
+        exclude: \.ipynb$
       - id: check-added-large-files
+        # Model weights, databases, checkpoints and prediction dumps must never
+        # enter git history. .gitignore is the policy; this is the backstop.
         args: [--maxkb=1000]
+
+  # Keep notebooks free of outputs and execution counts: stored results make
+  # diffs unreadable and let a stale number look like a current one.
+  - repo: https://github.com/kynan/nbstripout
+    rev: 0.8.1
+    hooks:
+      - id: nbstripout
