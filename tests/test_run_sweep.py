@@ -396,3 +396,105 @@ def test_the_plan_matches_the_sweep_when_given_the_config(
     curve = [row for row in rows if row["experiment"] == "learning_curve"]
     assert {row["lora_rank"] for row in curve} == {"8"}
     assert {row["seed"] for row in rows} == {"7"}
+
+
+# --------------------------------------------------------------------------
+# The alpha/rank confound
+# --------------------------------------------------------------------------
+
+
+def test_the_rank_ablation_holds_the_lora_scaling_constant(tmp_path: Path) -> None:
+    """PEFT scales the update by alpha/rank, so a fixed alpha confounds the sweep.
+
+    With alpha pinned at 32 the scaling ran from 8.0 at rank 4 to 0.5 at rank 64,
+    a factor of sixteen. Capacity and effective step size moved together, so no
+    result could be attributed to either. The protocol asks for rank to vary
+    "while holding other training settings fixed"; this is one of them.
+    """
+    base = load_config(_config(tmp_path, rank=16))
+    scalings = set()
+    for cell in run_sweep.rank_ablation_plan():
+        derived = run_sweep.cell_config(base, cell, tmp_path / cell.name)
+        assert derived.lora.rank == cell.lora_rank
+        scalings.add(derived.lora.alpha / derived.lora.rank)
+    assert scalings == {2.0}, f"alpha/rank varied across the sweep: {sorted(scalings)}"
+
+
+def test_rslora_keeps_a_fixed_alpha(tmp_path: Path) -> None:
+    """rsLoRA rescales by 1/sqrt(rank) itself; scaling alpha too would double-correct."""
+    from dataclasses import replace
+
+    base = load_config(_config(tmp_path, rank=16))
+    base = replace(base, lora=replace(base.lora, use_rslora=True))
+    alphas = {
+        run_sweep.cell_config(base, cell, tmp_path / cell.name).lora.alpha
+        for cell in run_sweep.rank_ablation_plan()
+    }
+    assert alphas == {32}
+
+
+def test_the_learning_curve_keeps_the_configured_alpha(tmp_path: Path) -> None:
+    """Rank is constant across learning-curve cells, so alpha must not move either."""
+    base = load_config(_config(tmp_path, rank=8))
+    cells = run_sweep.learning_curve_plan(3000, rank=base.lora.rank, seed=base.training.seed)
+    derived = [run_sweep.cell_config(base, cell, tmp_path / cell.name) for cell in cells]
+    assert {config.lora.alpha for config in derived} == {16}
+    assert {config.lora.rank for config in derived} == {8}
+
+
+# --------------------------------------------------------------------------
+# Explicit flags beat the config file
+# --------------------------------------------------------------------------
+
+
+def test_an_explicit_seed_is_not_discarded_by_the_config(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Silently dropping a flag the user typed is the failure this script prevents."""
+    data = _dataset(tmp_path / "train.jsonl", n=3000)
+    output = tmp_path / "plan.csv"
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "plan_experiments.py",
+            "--train-data",
+            str(data),
+            "--output",
+            str(output),
+            "--seed",
+            "999",
+            "--config",
+            str(_config(tmp_path, rank=8, seed=42)),
+        ],
+    )
+    plan_experiments.main()
+    with output.open(encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
+    assert {row["seed"] for row in rows} == {"999"}
+    # The rank still comes from the config, which has no competing flag.
+    assert {row["lora_rank"] for row in rows if row["experiment"] == "learning_curve"} == {"8"}
+
+
+def test_the_config_seed_is_used_when_no_flag_is_given(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    data = _dataset(tmp_path / "train.jsonl", n=3000)
+    output = tmp_path / "plan.csv"
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "plan_experiments.py",
+            "--train-data",
+            str(data),
+            "--output",
+            str(output),
+            "--config",
+            str(_config(tmp_path, seed=7)),
+        ],
+    )
+    plan_experiments.main()
+    with output.open(encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
+    assert {row["seed"] for row in rows} == {"7"}

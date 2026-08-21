@@ -136,6 +136,16 @@ changes.
   every cell trained at the planning default of 16 whatever the config asked for.
   A curve measured at rank 16 cannot be compared with the LoRA or QLoRA runs it
   exists to contextualise, and nothing announced the substitution.
+- **The rank ablation was confounded.** `cell_config` varied `lora.rank` while
+  leaving `lora.alpha` fixed, and PEFT scales the LoRA update by `alpha / rank`.
+  Across ranks 4 to 64 with alpha 32 the scaling ran from 8.0 to 0.5 — a
+  sixteen-fold swing in effective step size moving in lockstep with capacity, so
+  no result could be attributed to either. The protocol asks for rank to vary
+  "while holding other training settings fixed", and this is one of them. Alpha
+  now scales with rank to hold the configured `alpha / rank`, except under
+  rsLoRA, which rescales by `1 / sqrt(rank)` itself and would be double-corrected.
+- **`plan_experiments` silently discarded an explicit `--seed`** when `--config`
+  was also given. An explicitly supplied flag now beats the file.
 - **The sweep wrote its summary where nothing read it.** `run_sweep.py` writes
   `results/sweeps/<kind>/summary.csv`; the analysis notebooks looked for
   `results/<kind>_summary.csv`. A multi-hour sweep would finish and the notebook

@@ -30,10 +30,27 @@ def release_accelerator_cache() -> None:
 
 
 def cell_config(base: ExperimentConfig, cell: ExperimentCell, output_dir: Path) -> ExperimentConfig:
-    """Create a run-specific immutable configuration."""
+    """Create a run-specific immutable configuration.
+
+    PEFT scales the LoRA update by ``alpha / rank``. Varying rank with alpha held
+    fixed therefore changes the effective step size at the same time as the
+    capacity, and the rank ablation cannot attribute its result to either: over
+    ranks 4 to 64 with alpha 32, the scaling moves from 8.0 to 0.5, a factor of
+    sixteen. The protocol calls for ranks to vary "while holding other training
+    settings fixed", and the effective step size is one of them.
+
+    So alpha is scaled with rank to hold ``alpha / rank`` at the value the base
+    configuration chose. The exception is rsLoRA, which rescales by
+    ``1 / sqrt(rank)`` internally and is designed to be used with a fixed alpha;
+    scaling alpha as well would double-correct.
+    """
+    lora = replace(base.lora, rank=cell.lora_rank)
+    if not base.lora.use_rslora:
+        scaling = base.lora.alpha / base.lora.rank
+        lora = replace(lora, alpha=max(1, round(cell.lora_rank * scaling)))
     return replace(
         base,
-        lora=replace(base.lora, rank=cell.lora_rank),
+        lora=lora,
         training=replace(base.training, output_dir=str(output_dir), seed=cell.seed),
     )
 

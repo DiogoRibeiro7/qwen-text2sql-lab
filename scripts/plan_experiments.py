@@ -16,7 +16,11 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--train-data", type=Path, required=True)
     parser.add_argument("--output", type=Path, default=Path("results/experiment_plan.csv"))
-    parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument(
+        "--seed",
+        type=int,
+        help="Overrides the config seed when both are given. Defaults to 42.",
+    )
     parser.add_argument(
         "--config",
         type=Path,
@@ -28,10 +32,14 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    rank, seed = 16, args.seed
+    rank, seed = 16, 42
     if args.config is not None:
         config = load_config(args.config)
         rank, seed = config.lora.rank, config.training.seed
+    # An explicitly supplied flag beats the file. Silently discarding it would be
+    # the same failure this script's own plan exists to prevent.
+    if args.seed is not None:
+        seed = args.seed
 
     total = sum(1 for _ in read_jsonl(args.train_data))
     learning_cells = learning_curve_plan(total, rank=rank, seed=seed)
