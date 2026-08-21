@@ -5,11 +5,11 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
+
 from qwen_text2sql.config import load_config
 from qwen_text2sql.inference.generator import generate_sql, load_inference_model
 from qwen_text2sql.io import read_jsonl, write_jsonl
 from qwen_text2sql.pipeline import prepared_from_mapping
-
 
 
 def main() -> None:

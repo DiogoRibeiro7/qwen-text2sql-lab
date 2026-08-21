@@ -93,12 +93,11 @@ def _normalise_scalar(value: Any, tolerance: float) -> tuple[str, Any]:
     return ("text", str(value).strip())
 
 
-def canonical_rows(rows: tuple[tuple[Any, ...], ...], tolerance: float = 1e-6) -> Counter[tuple[Any, ...]]:
+def canonical_rows(
+    rows: tuple[tuple[Any, ...], ...], tolerance: float = 1e-6
+) -> Counter[tuple[Any, ...]]:
     """Canonicalize result rows as an order-independent multiset."""
-    return Counter(
-        tuple(_normalise_scalar(value, tolerance) for value in row)
-        for row in rows
-    )
+    return Counter(tuple(_normalise_scalar(value, tolerance) for value in row) for row in rows)
 
 
 def results_equivalent(gold: QueryResult, predicted: QueryResult, tolerance: float = 1e-6) -> bool:

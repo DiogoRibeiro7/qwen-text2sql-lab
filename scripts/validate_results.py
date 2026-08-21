@@ -7,7 +7,14 @@ import argparse
 import json
 from pathlib import Path
 
-REQUIRED_METRICS = {"n", "valid_sql_rate", "execution_accuracy", "exact_match", "mean_latency_ms", "errors"}
+REQUIRED_METRICS = {
+    "n",
+    "valid_sql_rate",
+    "execution_accuracy",
+    "exact_match",
+    "mean_latency_ms",
+    "errors",
+}
 
 
 def main() -> None:

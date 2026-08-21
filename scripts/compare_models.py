@@ -21,7 +21,9 @@ def main() -> None:
     args = parser.parse_args()
 
     first = {str(row["example_id"]): bool(row["execution_match"]) for row in read_jsonl(args.first)}
-    second = {str(row["example_id"]): bool(row["execution_match"]) for row in read_jsonl(args.second)}
+    second = {
+        str(row["example_id"]): bool(row["execution_match"]) for row in read_jsonl(args.second)
+    }
     if first.keys() != second.keys():
         raise ValueError("Evaluation files must contain the same example IDs")
     ids = sorted(first)

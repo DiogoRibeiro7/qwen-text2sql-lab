@@ -19,7 +19,9 @@ def evaluate_prediction(
     predicted_result = execute_read_only(
         example.db_path, predicted_sql, timeout_seconds=timeout_seconds
     )
-    gold_result = execute_read_only(example.db_path, example.gold_sql, timeout_seconds=timeout_seconds)
+    gold_result = execute_read_only(
+        example.db_path, example.gold_sql, timeout_seconds=timeout_seconds
+    )
     if not gold_result.ok:
         raise RuntimeError(
             f"Gold SQL failed for example {example.example_id}: {gold_result.error_message}"

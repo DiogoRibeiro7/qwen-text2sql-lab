@@ -21,7 +21,11 @@ def load_inference_model(model_id: str, adapter_path: str | Path | None = None) 
     tokenizer = AutoTokenizer.from_pretrained(tokenizer_source)
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token = tokenizer.eos_token
-    dtype = torch.bfloat16 if torch.cuda.is_available() and torch.cuda.is_bf16_supported() else torch.float16
+    dtype = (
+        torch.bfloat16
+        if torch.cuda.is_available() and torch.cuda.is_bf16_supported()
+        else torch.float16
+    )
     model = Qwen3_5ForCausalLM.from_pretrained(model_id, device_map="auto", dtype=dtype)
     if adapter_path is not None:
         from peft import PeftModel
@@ -42,7 +46,9 @@ def generate_sql(
 
     messages = conversation_prompt(example)
     rendered = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-    inputs = tokenizer(rendered, return_tensors="pt", truncation=True, max_length=config.max_seq_length)
+    inputs = tokenizer(
+        rendered, return_tensors="pt", truncation=True, max_length=config.max_seq_length
+    )
     inputs = {key: value.to(model.device) for key, value in inputs.items()}
     do_sample = config.temperature > 0.0
     generation_kwargs: dict[str, Any] = {

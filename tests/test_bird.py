@@ -22,7 +22,10 @@ def test_prepare_rows_embeds_schema(sample_db: Path, tmp_path: Path) -> None:
             "db_id": "shop",
             "question": "Who spent most?",
             "evidence": "amount means spend",
-            "SQL": "SELECT customer_id FROM orders GROUP BY customer_id ORDER BY SUM(amount) DESC LIMIT 1",
+            "SQL": (
+                "SELECT customer_id FROM orders "
+                "GROUP BY customer_id ORDER BY SUM(amount) DESC LIMIT 1"
+            ),
         }
     ]
     prepared = prepare_bird_rows(rows, root)

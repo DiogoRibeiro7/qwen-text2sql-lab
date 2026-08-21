@@ -22,7 +22,9 @@ def test_missing_column_is_classified(sample_db: Path) -> None:
 
 def test_result_equivalence_is_order_independent(sample_db: Path) -> None:
     first = execute_read_only(sample_db, "SELECT customer_id FROM customers ORDER BY customer_id")
-    second = execute_read_only(sample_db, "SELECT customer_id FROM customers ORDER BY customer_id DESC")
+    second = execute_read_only(
+        sample_db, "SELECT customer_id FROM customers ORDER BY customer_id DESC"
+    )
     assert results_equivalent(first, second)
 
 

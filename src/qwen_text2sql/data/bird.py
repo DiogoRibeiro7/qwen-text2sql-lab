@@ -54,7 +54,9 @@ def make_example_id(db_id: str, question: str, gold_sql: str) -> str:
     return hashlib.sha256(payload).hexdigest()[:20]
 
 
-def prepare_bird_rows(rows: Iterable[Mapping[str, Any]], db_root: str | Path) -> list[PreparedExample]:
+def prepare_bird_rows(
+    rows: Iterable[Mapping[str, Any]], db_root: str | Path
+) -> list[PreparedExample]:
     """Convert BIRD-like rows into schema-grounded examples."""
     schema_cache: dict[str, tuple[Path, str]] = {}
     prepared: list[PreparedExample] = []
@@ -65,7 +67,9 @@ def prepare_bird_rows(rows: Iterable[Mapping[str, Any]], db_root: str | Path) ->
         db_id = _first_text(row, DB_KEYS, required=True)
         evidence = _first_text(row, EVIDENCE_KEYS, required=False)
         difficulty = _first_text(row, DIFFICULTY_KEYS, required=False)
-        source_id_value = next((row.get(key) for key in SOURCE_ID_KEYS if row.get(key) is not None), "")
+        source_id_value = next(
+            (row.get(key) for key in SOURCE_ID_KEYS if row.get(key) is not None), ""
+        )
         source_id = str(source_id_value)
         if db_id not in schema_cache:
             db_path = find_sqlite_database(db_root, db_id)
