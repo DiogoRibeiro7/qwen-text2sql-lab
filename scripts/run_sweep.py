@@ -87,7 +87,9 @@ def main() -> None:
                 adapter_path=adapter,
                 limit=args.limit_eval,
             )
-            row.update({key: value for key, value in metrics.items() if not isinstance(value, dict)})
+            row.update(
+                {key: value for key, value in metrics.items() if not isinstance(value, dict)}
+            )
             release_accelerator_cache()
         rows.append(row)
         fieldnames = sorted({key for item in rows for key in item})

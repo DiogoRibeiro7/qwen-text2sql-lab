@@ -5,12 +5,12 @@ from __future__ import annotations
 import json
 from dataclasses import asdict
 from pathlib import Path
+
 from qwen_text2sql.config import ExperimentConfig
 from qwen_text2sql.io import read_jsonl, sha256_file
 from qwen_text2sql.pipeline import prepared_from_mapping
 from qwen_text2sql.training.formatting import sft_record
 from qwen_text2sql.training.modeling import load_qwen_text_model
-
 
 
 def train_adapter(
@@ -39,7 +39,9 @@ def train_adapter(
     )
 
     train_dataset = Dataset.from_list([sft_record(row) for row in train_examples])
-    eval_dataset = Dataset.from_list([sft_record(row) for row in eval_examples]) if eval_examples else None
+    eval_dataset = (
+        Dataset.from_list([sft_record(row) for row in eval_examples]) if eval_examples else None
+    )
     model, tokenizer = load_qwen_text_model(config)
     peft_config = LoraConfig(
         r=config.lora.rank,

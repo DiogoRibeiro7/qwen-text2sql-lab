@@ -24,12 +24,12 @@ def main() -> None:
     cells = learning_cells + rank_cells
     args.output.parent.mkdir(parents=True, exist_ok=True)
     with args.output.open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=["experiment", "name", "train_size", "lora_rank", "seed"])
+        writer = csv.DictWriter(
+            handle, fieldnames=["experiment", "name", "train_size", "lora_rank", "seed"]
+        )
         writer.writeheader()
         for index, cell in enumerate(cells):
-            experiment = (
-                "learning_curve" if index < len(learning_cells) else "rank_ablation"
-            )
+            experiment = "learning_curve" if index < len(learning_cells) else "rank_ablation"
             writer.writerow(
                 {
                     "experiment": experiment,

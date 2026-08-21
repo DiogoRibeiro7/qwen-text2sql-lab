@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question or discussion
+    url: https://github.com/DiogoRibeiro7/qwen-text2sql-lab/discussions
+    about: Ask about the research design, metrics or how to reproduce a result.
+  - name: Security vulnerability
+    url: https://github.com/DiogoRibeiro7/qwen-text2sql-lab/security/advisories/new
+    about: Report a vulnerability privately. Do not open a public issue.

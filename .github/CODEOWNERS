@@ -1,0 +1,7 @@
+# Default owner for everything in this repository.
+*       @DiogoRibeiro7
+
+# Research protocol and evaluation logic carry the scientific claims of the
+# project; changes here should always be reviewed against docs/research_protocol.md.
+/src/qwen_text2sql/evaluation/   @DiogoRibeiro7
+/docs/research_protocol.md       @DiogoRibeiro7

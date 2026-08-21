@@ -1,5 +1,12 @@
 # Qwen Text-to-SQL Lab
 
+[![CI](https://github.com/DiogoRibeiro7/qwen-text2sql-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/DiogoRibeiro7/qwen-text2sql-lab/actions/workflows/ci.yml)
+[![Python 3.11 | 3.12 | 3.13](https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13-blue.svg)](pyproject.toml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![Typed: mypy strict](https://img.shields.io/badge/mypy-strict-2a6db2.svg)](https://mypy-lang.org/)
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
+
 A reproducible research repository for adapting **Qwen3.5-4B** to text-to-SQL with **LoRA** and **QLoRA**, then evaluating whether task-specific fine-tuning improves executable SQL generation.
 
 The repository is built around one primary question:
@@ -80,7 +87,9 @@ Python 3.11+ is recommended. The project uses Poetry.
 poetry install --with dev,quantization
 ```
 
-For environments without 4-bit CUDA training, omit the quantization group:
+`poetry.lock` is committed, so this resolves to the same versions on every
+machine. For environments without 4-bit CUDA training, omit the quantization
+group:
 
 ```bash
 poetry install --with dev
@@ -133,7 +142,7 @@ Treat this as an external evaluation set: do not choose learning rates, LoRA ran
 Generate SQL before fine-tuning:
 
 ```bash
-PYTHONPATH=src poetry run python scripts/generate_predictions.py \
+poetry run python scripts/generate_predictions.py \
   --config configs/baseline.yaml \
   --data data/processed/bird_validation.jsonl \
   --output results/predictions/baseline_validation.jsonl
@@ -142,7 +151,7 @@ PYTHONPATH=src poetry run python scripts/generate_predictions.py \
 Evaluate by execution:
 
 ```bash
-PYTHONPATH=src poetry run python scripts/evaluate_predictions.py \
+poetry run python scripts/evaluate_predictions.py \
   --data data/processed/bird_validation.jsonl \
   --predictions results/predictions/baseline_validation.jsonl \
   --records-output results/baseline_validation_records.jsonl \
@@ -152,7 +161,7 @@ PYTHONPATH=src poetry run python scripts/evaluate_predictions.py \
 ## LoRA fine-tuning
 
 ```bash
-PYTHONPATH=src poetry run python scripts/train_adapter.py \
+poetry run python scripts/train_adapter.py \
   --config configs/qwen35_4b_lora.yaml \
   --train-data data/processed/bird_train.jsonl \
   --validation-data data/processed/bird_validation.jsonl
@@ -163,7 +172,7 @@ Only PEFT adapter artifacts are written to the configured checkpoint directory.
 Generate adapted predictions:
 
 ```bash
-PYTHONPATH=src poetry run python scripts/generate_predictions.py \
+poetry run python scripts/generate_predictions.py \
   --config configs/qwen35_4b_lora.yaml \
   --adapter results/checkpoints/qwen35_4b_lora/adapter \
   --data data/processed/bird_validation.jsonl \
@@ -175,7 +184,7 @@ PYTHONPATH=src poetry run python scripts/generate_predictions.py \
 The QLoRA configuration loads the text model in 4-bit NF4, prepares it for k-bit training, then trains LoRA parameters over linear modules.
 
 ```bash
-PYTHONPATH=src poetry run python scripts/train_adapter.py \
+poetry run python scripts/train_adapter.py \
   --config configs/qwen35_4b_qlora.yaml \
   --train-data data/processed/bird_train.jsonl \
   --validation-data data/processed/bird_validation.jsonl
@@ -202,7 +211,7 @@ This gives the decomposition:
 Create the planned experiment matrix:
 
 ```bash
-PYTHONPATH=src poetry run python scripts/plan_experiments.py \
+poetry run python scripts/plan_experiments.py \
   --train-data data/processed/bird_train.jsonl \
   --output results/experiment_plan.csv
 ```
@@ -212,7 +221,7 @@ The machine-readable plan prevents silently dropping a training-set size or LoRA
 Run either sweep end to end with:
 
 ```bash
-PYTHONPATH=src poetry run python scripts/run_sweep.py \
+poetry run python scripts/run_sweep.py \
   --kind learning_curve \
   --config configs/qwen35_4b_qlora.yaml \
   --train-data data/processed/bird_train.jsonl \
@@ -226,7 +235,7 @@ Use `--kind rank_ablation` for the adapter-rank experiment. The sweep writes a p
 After evaluating two models on the same examples:
 
 ```bash
-PYTHONPATH=src poetry run python scripts/compare_models.py \
+poetry run python scripts/compare_models.py \
   --first results/baseline_validation_records.jsonl \
   --second results/lora_validation_records.jsonl \
   --n-bootstrap 10000 \
@@ -237,31 +246,62 @@ The paired bootstrap operates on per-example execution success, preserving the p
 
 ## Notebooks
 
-The notebook sequence mirrors the experiment rather than hiding logic inside notebooks:
+The notebook sequence mirrors the experiment rather than hiding logic inside
+notebooks. Each one states the question it answers, what it decides, and — in a
+closing section — what its result does **not** show.
 
-```text
-00_research_protocol.ipynb
-01_data_audit.ipynb
-02_foundation_model_baseline.ipynb
-03_lora_finetuning.ipynb
-04_qlora_finetuning.ipynb
-05_execution_evaluation.ipynb
-06_error_analysis.ipynb
-07_learning_curves.ipynb
-08_adapter_rank_ablation.ipynb
-09_base_vs_posttrained.ipynb
+| Notebook | Decides |
+|---|---|
+| [`00_research_protocol`](notebooks/00_research_protocol.ipynb) | The estimand, the comparison matrix, and whether the evaluation is large enough to detect the effect |
+| [`01_data_audit`](notebooks/01_data_audit.ipynb) | Whether the data is fit to train on: split integrity, record integrity, prompt budget, composition |
+| [`02_foundation_model_baseline`](notebooks/02_foundation_model_baseline.ipynb) | The reference point every later claim is measured against |
+| [`03_lora_finetuning`](notebooks/03_lora_finetuning.ipynb) | The LoRA recipe, and what to watch while it trains |
+| [`04_qlora_finetuning`](notebooks/04_qlora_finetuning.ipynb) | The QLoRA recipe, and that it differs from LoRA in exactly one respect |
+| [`05_execution_evaluation`](notebooks/05_execution_evaluation.ipynb) | Whether fine-tuning helped, as a paired difference with an interval |
+| [`06_error_analysis`](notebooks/06_error_analysis.ipynb) | What to build next, from the structure of the failures |
+| [`07_learning_curves`](notebooks/07_learning_curves.ipynb) | Whether labelling more data is worth it |
+| [`08_adapter_rank_ablation`](notebooks/08_adapter_rank_ablation.ipynb) | Whether adapter capacity is the binding constraint |
+| [`09_base_vs_posttrained`](notebooks/09_base_vs_posttrained.ipynb) | How much capability comes from post-training vs task adaptation |
+
+Three conventions keep them trustworthy:
+
+- **Reusable logic lives in `src/qwen_text2sql/reporting/`**, which is type
+  checked and unit tested. Notebooks orchestrate and interpret; they do not
+  define the analysis.
+- **A missing input fails loudly.** Every notebook declares its prerequisites and
+  raises `MissingArtifact` naming the exact command that produces the file,
+  rather than rendering an empty table that looks like a result.
+- **No output is committed.** Notebooks are stored without outputs or execution
+  counts, enforced by `nbstripout` and `make notebooks`.
+
+Notebooks 00, 03 and 04 run end to end with no data at all. The rest stop at
+their first missing prerequisite with instructions.
+
+```bash
+poetry install --with dev,notebooks
+poetry run jupyter lab
 ```
-
-Reusable implementation lives under `src/`; notebooks orchestrate, inspect and visualize.
 
 ## Quality gates
 
 ```bash
-make lint
-make typecheck
-make test
-make notebooks
+make check      # lint + format-check + typecheck + test
+make notebooks  # static notebook validation
 ```
+
+Individual targets are listed by `make help`. Install the git hooks once with
+`make hooks` so formatting and the large-file guard run on every commit.
+
+| Gate | Enforces |
+|---|---|
+| `make lint` | Ruff rules `E`, `F`, `I`, `UP`, `B`, `SIM`, `RUF`, notebooks included |
+| `make format-check` | Ruff formatting (`make format` fixes) |
+| `make typecheck` | `mypy --strict` over `src/qwen_text2sql` |
+| `make test` | pytest with branch coverage |
+| `make notebooks` | every notebook cell compiles and carries no committed outputs |
+
+CI runs all of these on Python 3.11, 3.12 and 3.13, and additionally builds and
+metadata-checks the distribution.
 
 CI intentionally does not download model weights or BIRD databases. Unit tests build small temporary SQLite databases and verify schema extraction, read-only execution, result equivalence, splitting, formatting, metrics and bootstrap logic.
 
@@ -297,6 +337,25 @@ tests/               unit and regression tests
 - PEFT quantization guide: https://huggingface.co/docs/peft/developer_guides/quantization
 - BIRD filtered training data: https://huggingface.co/datasets/birdsql/bird23-train-filtered
 - BIRD revised development data: https://huggingface.co/datasets/birdsql/bird_sql_dev_20251106
+
+## Contributing
+
+Contributions are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md), which
+covers the development setup, the quality gates, and the research-integrity
+rules a change to the experimental protocol must respect. Participation is
+governed by the [Code of Conduct](CODE_OF_CONDUCT.md).
+
+Security vulnerabilities must be reported privately — see
+[SECURITY.md](SECURITY.md). Note that this project executes model-generated SQL
+in order to score it; run evaluation against copies of benchmark databases, never
+against a database holding real data.
+
+Released changes are recorded in [CHANGELOG.md](CHANGELOG.md).
+
+## Citation
+
+If you use this repository, cite it using the metadata in
+[CITATION.cff](CITATION.cff), or via the "Cite this repository" button on GitHub.
 
 ## License
 

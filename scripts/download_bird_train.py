@@ -17,7 +17,7 @@ URL = "https://bird-bench.oss-cn-beijing.aliyuncs.com/train.zip"
 def download(url: str, output: Path, chunk_size: int = 8 * 1024 * 1024) -> None:
     """Stream a remote file to disk without holding it in memory."""
     output.parent.mkdir(parents=True, exist_ok=True)
-    with urllib.request.urlopen(url) as response, output.open("wb") as handle:  # noqa: S310
+    with urllib.request.urlopen(url) as response, output.open("wb") as handle:
         total = int(response.headers.get("Content-Length", "0"))
         written = 0
         while True:

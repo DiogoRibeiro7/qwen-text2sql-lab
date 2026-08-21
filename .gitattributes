@@ -1,0 +1,32 @@
+# Normalise line endings in the repository; check out platform-native where it matters.
+* text=auto eol=lf
+
+*.py     text eol=lf diff=python
+*.md     text eol=lf
+*.yml    text eol=lf
+*.yaml   text eol=lf
+*.toml   text eol=lf
+*.cff    text eol=lf
+*.sql    text eol=lf
+Makefile text eol=lf
+
+# Windows-only scripts must keep CRLF.
+*.bat    text eol=crlf
+*.ps1    text eol=crlf
+
+# Binary artifacts: never diff or merge these.
+*.sqlite   binary
+*.db       binary
+*.zip      binary
+*.safetensors binary
+*.bin      binary
+*.png      binary
+*.jpg      binary
+*.pdf      binary
+
+# Notebooks diff poorly; outputs are stripped by pre-commit, but keep merges manual.
+*.ipynb  text eol=lf linguist-documentation merge=binary
+
+# Keep GitHub language stats focused on the implementation.
+notebooks/*  linguist-documentation
+docs/*       linguist-documentation

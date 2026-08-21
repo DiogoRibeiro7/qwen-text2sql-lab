@@ -30,17 +30,14 @@ def sqlite_schema_text(db_path: str | Path) -> str:
                 f"PRAGMA table_info({quote_identifier(table_name)})"
             ).fetchall()
             column_lines = [
-                f"  {str(row[1])} {str(row[2]) or 'UNKNOWN'}"
-                + (" PRIMARY KEY" if int(row[5]) else "")
+                f"  {row[1]!s} {str(row[2]) or 'UNKNOWN'}" + (" PRIMARY KEY" if int(row[5]) else "")
                 for row in columns
             ]
             foreign_keys = connection.execute(
                 f"PRAGMA foreign_key_list({quote_identifier(table_name)})"
             ).fetchall()
             for fk in foreign_keys:
-                column_lines.append(
-                    f"  FOREIGN KEY ({str(fk[3])}) REFERENCES {str(fk[2])}({str(fk[4])})"
-                )
+                column_lines.append(f"  FOREIGN KEY ({fk[3]!s}) REFERENCES {fk[2]!s}({fk[4]!s})")
             blocks.append(f"TABLE {table_name} (\n" + ",\n".join(column_lines) + "\n)")
         if not blocks:
             raise ValueError(f"Database has no user tables: {path}")

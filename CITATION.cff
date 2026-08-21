@@ -1,6 +1,13 @@
 cff-version: 1.2.0
 message: "If you use this repository, please cite it."
 title: "Qwen Text-to-SQL Lab"
+abstract: >-
+  A reproducible research repository for adapting Qwen3.5-4B to text-to-SQL with
+  LoRA and QLoRA. The primary endpoint is execution accuracy: generated SQL is
+  executed against the target SQLite database and compared with the result of the
+  verified reference query. The repository provides schema-grounded data
+  preparation from BIRD, database-disjoint splitting, adapter training,
+  read-only execution evaluation, and paired bootstrap model comparison.
 type: software
 authors:
   - family-names: Ribeiro
@@ -8,3 +15,38 @@ authors:
 version: 0.1.0
 date-released: 2026-08-19
 license: MIT
+repository-code: "https://github.com/DiogoRibeiro7/qwen-text2sql-lab"
+url: "https://github.com/DiogoRibeiro7/qwen-text2sql-lab"
+keywords:
+  - text-to-SQL
+  - semantic parsing
+  - large language models
+  - parameter-efficient fine-tuning
+  - LoRA
+  - QLoRA
+  - Qwen
+  - BIRD benchmark
+  - execution accuracy
+  - reproducible research
+references:
+  - type: article
+    title: >-
+      Can LLM Already Serve as A Database Interface? A Big Bench for
+      Large-Scale Database Grounded Text-to-SQLs
+    authors:
+      - family-names: Li
+        given-names: Jinyang
+    year: 2023
+    notes: "BIRD benchmark used as the evaluation dataset."
+  - type: article
+    title: "LoRA: Low-Rank Adaptation of Large Language Models"
+    authors:
+      - family-names: Hu
+        given-names: "Edward J."
+    year: 2021
+  - type: article
+    title: "QLoRA: Efficient Finetuning of Quantized LLMs"
+    authors:
+      - family-names: Dettmers
+        given-names: Tim
+    year: 2023

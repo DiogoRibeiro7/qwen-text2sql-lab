@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+
 from qwen_text2sql.config import load_config
 from qwen_text2sql.data.bird import prepare_bird_rows
 from qwen_text2sql.data.splits import split_by_database
@@ -13,7 +14,6 @@ from qwen_text2sql.evaluation.metrics import summarize
 from qwen_text2sql.io import read_jsonl, write_jsonl
 from qwen_text2sql.pipeline import prepared_from_mapping
 from qwen_text2sql.training.train import train_adapter
-
 
 
 def _prepare(args: argparse.Namespace) -> None:

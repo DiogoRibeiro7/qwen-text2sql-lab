@@ -6,11 +6,11 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+
 from qwen_text2sql.evaluation.evaluator import evaluate_prediction
 from qwen_text2sql.evaluation.metrics import summarize
 from qwen_text2sql.io import read_jsonl, write_jsonl
 from qwen_text2sql.pipeline import prepared_from_mapping
-
 
 
 def main() -> None:
@@ -21,7 +21,9 @@ def main() -> None:
     parser.add_argument("--metrics-output", type=Path, required=True)
     args = parser.parse_args()
 
-    examples = {e.example_id: e for e in (prepared_from_mapping(row) for row in read_jsonl(args.data))}
+    examples = {
+        e.example_id: e for e in (prepared_from_mapping(row) for row in read_jsonl(args.data))
+    }
     records = []
     for row in read_jsonl(args.predictions):
         example_id = str(row["example_id"])
