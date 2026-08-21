@@ -50,6 +50,15 @@ changes.
 - `matplotlib` and `ipykernel` declared in a `notebooks` dependency group. The
   notebooks imported matplotlib without it ever being declared; it resolved only
   as a transitive dependency, so a clean install broke notebooks 07 and 08.
+- Tests for BIRD preparation and for the input guards across the package,
+  taking total coverage to 87% with 21 modules at complete coverage. Preparation
+  is the pipeline's entry point, where a defect changes what every later number
+  describes rather than crashing: `example_id` is now pinned against a known
+  digest because it is the join key between predictions and examples, ambiguous
+  database resolution is asserted to raise rather than guess, and duplicate
+  suppression is covered. The guards — malformed configuration, single-database
+  splits, empty evaluations, a reference query that does not run, an empty
+  schema, non-object JSONL lines — were the least-covered code in the package.
 - `make format`, `make format-check`, `make build` and `make clean` targets.
 - Committed `poetry.lock` resolving all 109 transitive dependencies, so
   `poetry install` reproduces an identical environment. CI verifies the lock
