@@ -31,6 +31,14 @@ changes.
   written by `qwen-text2sql split`, evaluation of correct, wrong-but-runnable and
   unrunnable predictions, the legacy `predicted_sql` prediction key, and the
   guard that refuses a prediction whose `example_id` is not in the dataset.
+- Tests for the read-only execution sandbox, taking
+  `evaluation/execution.py` to 100% coverage and total coverage to 74%. These
+  assert the guarantees SECURITY.md makes: mutating, DDL, `ATTACH` and `PRAGMA`
+  statements are refused; the prefix check is not fooled by leading whitespace
+  or casing; statement chaining and extension loading are blocked; the database
+  file is byte-identical after every attack; a runaway query is interrupted and
+  reported as a timeout; and every SQLite error is classified into the
+  `error_kind` the metrics report.
 - `make format`, `make format-check`, `make build` and `make clean` targets.
 - Committed `poetry.lock` resolving all 109 transitive dependencies, so
   `poetry install` reproduces an identical environment. CI verifies the lock
