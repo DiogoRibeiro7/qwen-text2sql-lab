@@ -246,22 +246,41 @@ The paired bootstrap operates on per-example execution success, preserving the p
 
 ## Notebooks
 
-The notebook sequence mirrors the experiment rather than hiding logic inside notebooks:
+The notebook sequence mirrors the experiment rather than hiding logic inside
+notebooks. Each one states the question it answers, what it decides, and — in a
+closing section — what its result does **not** show.
 
-```text
-00_research_protocol.ipynb
-01_data_audit.ipynb
-02_foundation_model_baseline.ipynb
-03_lora_finetuning.ipynb
-04_qlora_finetuning.ipynb
-05_execution_evaluation.ipynb
-06_error_analysis.ipynb
-07_learning_curves.ipynb
-08_adapter_rank_ablation.ipynb
-09_base_vs_posttrained.ipynb
+| Notebook | Decides |
+|---|---|
+| [`00_research_protocol`](notebooks/00_research_protocol.ipynb) | The estimand, the comparison matrix, and whether the evaluation is large enough to detect the effect |
+| [`01_data_audit`](notebooks/01_data_audit.ipynb) | Whether the data is fit to train on: split integrity, record integrity, prompt budget, composition |
+| [`02_foundation_model_baseline`](notebooks/02_foundation_model_baseline.ipynb) | The reference point every later claim is measured against |
+| [`03_lora_finetuning`](notebooks/03_lora_finetuning.ipynb) | The LoRA recipe, and what to watch while it trains |
+| [`04_qlora_finetuning`](notebooks/04_qlora_finetuning.ipynb) | The QLoRA recipe, and that it differs from LoRA in exactly one respect |
+| [`05_execution_evaluation`](notebooks/05_execution_evaluation.ipynb) | Whether fine-tuning helped, as a paired difference with an interval |
+| [`06_error_analysis`](notebooks/06_error_analysis.ipynb) | What to build next, from the structure of the failures |
+| [`07_learning_curves`](notebooks/07_learning_curves.ipynb) | Whether labelling more data is worth it |
+| [`08_adapter_rank_ablation`](notebooks/08_adapter_rank_ablation.ipynb) | Whether adapter capacity is the binding constraint |
+| [`09_base_vs_posttrained`](notebooks/09_base_vs_posttrained.ipynb) | How much capability comes from post-training vs task adaptation |
+
+Three conventions keep them trustworthy:
+
+- **Reusable logic lives in `src/qwen_text2sql/reporting/`**, which is type
+  checked and unit tested. Notebooks orchestrate and interpret; they do not
+  define the analysis.
+- **A missing input fails loudly.** Every notebook declares its prerequisites and
+  raises `MissingArtifact` naming the exact command that produces the file,
+  rather than rendering an empty table that looks like a result.
+- **No output is committed.** Notebooks are stored without outputs or execution
+  counts, enforced by `nbstripout` and `make notebooks`.
+
+Notebooks 00, 03 and 04 run end to end with no data at all. The rest stop at
+their first missing prerequisite with instructions.
+
+```bash
+poetry install --with dev,notebooks
+poetry run jupyter lab
 ```
-
-Reusable implementation lives under `src/`; notebooks orchestrate, inspect and visualize.
 
 ## Quality gates
 

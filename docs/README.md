@@ -12,6 +12,7 @@ Operational documentation lives outside this directory:
 - [../CONTRIBUTING.md](../CONTRIBUTING.md) — development setup, quality gates and the rules a protocol change must respect.
 - [../SECURITY.md](../SECURITY.md) — the threat model around executing model-generated SQL, and how to report a vulnerability.
 - [../CHANGELOG.md](../CHANGELOG.md) — released changes, including any that alter a reported metric.
+- [../notebooks/](../notebooks/) — the experiment walkthrough; `00_research_protocol.ipynb` is the executable form of `research_protocol.md`.
 
 ## Reading order for a new contributor
 

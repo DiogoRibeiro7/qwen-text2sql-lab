@@ -46,6 +46,8 @@ dependencies = [
 
 [project.optional-dependencies]
 quantization = ["bitsandbytes>=0.46"]
+# Required by the notebooks and by qwen_text2sql.reporting.figures.
+notebooks = ["matplotlib>=3.8", "ipykernel>=6.29"]
 
 [project.scripts]
 qwen-text2sql = "qwen_text2sql.cli:main"
@@ -61,6 +63,10 @@ packages = [{ include = "qwen_text2sql", from = "src" }]
 
 [tool.poetry.group.quantization.dependencies]
 bitsandbytes = ">=0.46"
+
+[tool.poetry.group.notebooks.dependencies]
+matplotlib = ">=3.8"
+ipykernel = ">=6.29"
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=8.3"
@@ -96,7 +102,7 @@ warn_redundant_casts = true
 # keeps the local run (where the packages *are* installed and ship `py.typed`)
 # from failing on names these libraries re-export without declaring.
 [[tool.mypy.overrides]]
-module = ["datasets.*", "transformers.*", "trl.*", "peft.*", "bitsandbytes.*"]
+module = ["datasets.*", "transformers.*", "trl.*", "peft.*", "bitsandbytes.*", "cycler.*"]
 ignore_missing_imports = true
 implicit_reexport = true
 

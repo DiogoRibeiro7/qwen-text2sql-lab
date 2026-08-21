@@ -49,14 +49,15 @@ jobs:
           python-version: "3.11"
           cache: pip
       - name: Install typing dependencies
-        # The heavy ML stack (torch, transformers, trl, peft) is deliberately not
-        # installed here: it would dominate CI time and is not needed for the
-        # deterministic data/evaluation code. Those imports are lazy and covered
-        # by mypy overrides. Run `make typecheck` in a full environment before
-        # changing training or inference code.
+        # matplotlib is installed because qwen_text2sql.reporting.figures is typed
+        # against it. The heavy ML stack (torch, transformers, trl, peft) is
+        # deliberately not installed: it would dominate CI time and is not needed
+        # for the deterministic data/evaluation code. Those imports are lazy and
+        # covered by mypy overrides. Run `make typecheck` in a full environment
+        # before changing training or inference code.
         run: |
           python -m pip install --upgrade pip
-          python -m pip install "mypy==${MYPY_VERSION}" types-PyYAML numpy pandas
+          python -m pip install "mypy==${MYPY_VERSION}" types-PyYAML numpy pandas matplotlib
           python -m pip install -e . --no-deps
       - name: Mypy (strict)
         run: mypy src/qwen_text2sql
@@ -79,7 +80,7 @@ jobs:
         # temporary SQLite databases instead.
         run: |
           python -m pip install --upgrade pip
-          python -m pip install numpy pandas pyyaml pytest pytest-cov
+          python -m pip install numpy pandas pyyaml pytest pytest-cov matplotlib
           python -m pip install -e . --no-deps
       - name: Pytest
         run: pytest --cov=qwen_text2sql --cov-report=term-missing --cov-report=xml

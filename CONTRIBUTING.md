@@ -13,7 +13,7 @@ Python 3.11–3.13 and [Poetry](https://python-poetry.org/) are required.
 ```bash
 git clone https://github.com/DiogoRibeiro7/qwen-text2sql-lab.git
 cd qwen-text2sql-lab
-poetry install --with dev,quantization   # omit ",quantization" without a CUDA GPU
+poetry install --with dev,notebooks,quantization   # drop ",quantization" without a CUDA GPU
 poetry run pre-commit install
 ```
 
@@ -60,7 +60,14 @@ code.
 
 - **Reusable logic lives in `src/`.** Notebooks orchestrate, inspect and
   visualise; they do not define the implementation. A pull request that moves
-  logic into a notebook will be asked to move it back out.
+  logic into a notebook will be asked to move it back out. Analysis helpers
+  belong in `src/qwen_text2sql/reporting/`, where they can be tested.
+- **A notebook never renders an empty result.** Declare prerequisites through
+  `qwen_text2sql.reporting.artifact(...)` and call `.require()`; a missing input
+  must fail with the command that produces it, not with a blank table.
+- **Figures use the house style.** Call `use_house_style()` and the helpers in
+  `reporting/figures.py` rather than restyling matplotlib per notebook, and
+  report a proportion with an interval rather than as a bare point estimate.
 - **ML imports stay lazy.** `torch`, `transformers`, `trl` and `peft` are
   imported inside the functions that need them, so data preparation, evaluation
   and the whole QA suite run without a GPU or a model download. Please preserve

@@ -10,10 +10,10 @@ help: ## Show this help
 		| awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-14s\033[0m %s\n", $$1, $$2}'
 
 install: ## Install all dependencies, including 4-bit quantization support
-	$(POETRY) install --with dev,quantization
+	$(POETRY) install --with dev,notebooks,quantization
 
 install-cpu: ## Install without the quantization group (no CUDA GPU)
-	$(POETRY) install --with dev
+	$(POETRY) install --with dev,notebooks
 
 hooks: ## Install the pre-commit git hooks
 	$(RUN) pre-commit install

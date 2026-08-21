@@ -39,6 +39,17 @@ changes.
   file is byte-identical after every attack; a runaway query is interrupted and
   reported as a timeout; and every SQLite error is classified into the
   `error_kind` the metrics report.
+- `qwen_text2sql.reporting`, a tested analysis layer for the notebooks:
+  `context` (prerequisite handling, provenance capture, dataset fingerprints),
+  `tables` (tidy analysis frames), `style` (one house style, colourblind-safe
+  palette) and `figures` (publication-quality matplotlib figures).
+- `qwen_text2sql.evaluation.intervals` with the Wilson score interval and a
+  McNemar-based minimum-detectable-effect calculation, so a proportion is never
+  reported as a bare point estimate and an evaluation can be sized before it is
+  run.
+- `matplotlib` and `ipykernel` declared in a `notebooks` dependency group. The
+  notebooks imported matplotlib without it ever being declared; it resolved only
+  as a transitive dependency, so a clean install broke notebooks 07 and 08.
 - `make format`, `make format-check`, `make build` and `make clean` targets.
 - Committed `poetry.lock` resolving all 109 transitive dependencies, so
   `poetry install` reproduces an identical environment. CI verifies the lock
@@ -56,6 +67,12 @@ changes.
   without a deliberate bump.
 - Ruff now lints and formats `notebooks/` alongside `src`, `tests` and
   `scripts`.
+- All ten notebooks rewritten. Each now states the question it answers, what it
+  decides, and what its result does *not* show; declares its prerequisites and
+  fails with the command that produces a missing one instead of rendering an
+  empty table; captures commit, interpreter, platform and package versions as
+  provenance; and reports proportions with confidence intervals. Notebooks 00,
+  03 and 04 run end to end with no data present.
 - `scripts/validate_notebooks.py` additionally rejects committed notebook
   outputs and execution counts; `nbstripout` enforces this on commit.
 - Documented commands no longer need the `PYTHONPATH=src` prefix, since
