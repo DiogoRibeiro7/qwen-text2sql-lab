@@ -24,6 +24,13 @@ changes.
 - `.editorconfig` and `.gitattributes` for consistent whitespace and line
   endings across editors and platforms.
 - `docs/README.md` index with a suggested reading order.
+- Tests for `cli.py` and `pipeline.prepared_from_mapping`, which had no coverage
+  at all despite being pure Python. Total coverage rises from 56% to 71%, and
+  `cli.py` from 0% to 87%. The suite now covers argument defaults that encode the
+  research protocol (seed 42, 15% validation), the database-disjoint split
+  written by `qwen-text2sql split`, evaluation of correct, wrong-but-runnable and
+  unrunnable predictions, the legacy `predicted_sql` prediction key, and the
+  guard that refuses a prediction whose `example_id` is not in the dataset.
 - `make format`, `make format-check`, `make build` and `make clean` targets.
 - Committed `poetry.lock` resolving all 109 transitive dependencies, so
   `poetry install` reproduces an identical environment. CI verifies the lock
