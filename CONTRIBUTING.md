@@ -20,6 +20,20 @@ poetry run pre-commit install
 Nothing in the default developer setup downloads model weights or BIRD
 databases. The unit tests build small temporary SQLite databases instead.
 
+**On Windows**, `poetry install` can fail with
+`[WinError 206] The filename or extension is too long` while unpacking torch,
+whose `dist-info` bundles deeply nested third-party licence files. Windows caps
+*directory* creation at 248 characters unless long-path support is enabled, and
+the default Poetry virtualenv cache path is long enough to push those licence
+directories over the limit. Either shorten the virtualenv path:
+
+```bash
+poetry config virtualenvs.in-project true   # creates ./.venv instead
+```
+
+or enable long paths system-wide (`HKLM\SYSTEM\CurrentControlSet\Control\FileSystem`,
+`LongPathsEnabled = 1`, then reboot).
+
 `poetry.lock` is committed and resolves the full dependency graph, so every
 machine installs byte-identical versions. If you change a dependency constraint
 in `pyproject.toml`, run `poetry lock` and commit the result in the same change
@@ -74,10 +88,15 @@ Run `make check` before opening a pull request regardless.
 
 The package is typed and ships a `py.typed` marker. `mypy --strict` is enforced
 over `src/qwen_text2sql`. The heavy ML dependencies (`torch`, `transformers`,
-`trl`, `peft`) are deliberately **not** installed in CI, so type errors that
-only appear with those packages present will not be caught there. Run
+`trl`, `peft`) are **not** installed in the lightweight environment, so type
+errors that only appear with those packages present are invisible there.
+
+This is not hypothetical. `train_adapter` passed `warmup_ratio` to
+`trl.SFTConfig` long after transformers removed it, so every training run raised
+a `TypeError` before its first step — and nothing noticed, because trl had never
+been installed anywhere the type checker ran. **Run `make install` and then
 `make typecheck` in a full environment before touching training or inference
-code.
+code.**
 
 ## Code conventions
 

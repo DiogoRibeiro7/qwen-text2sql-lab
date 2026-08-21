@@ -149,7 +149,11 @@ def use_house_style(mode: Mode = "light") -> Palette:
     import matplotlib.pyplot as plt
 
     palette = palette_for(mode)
-    plt.rcParams.update(_rc_params(palette))
+    # matplotlib types rcParams keys as a Literal union of every valid setting
+    # name, which a dict[str, Any] cannot satisfy. The keys are validated by
+    # matplotlib at runtime, and test_use_house_style_applies_globally asserts
+    # they take effect.
+    plt.rcParams.update(_rc_params(palette))  # type: ignore[arg-type]
     return palette
 
 
@@ -159,5 +163,5 @@ def house_style(mode: Mode = "light") -> Iterator[Palette]:
     import matplotlib.pyplot as plt
 
     palette = palette_for(mode)
-    with plt.rc_context(_rc_params(palette)):
+    with plt.rc_context(_rc_params(palette)):  # type: ignore[arg-type]
         yield palette

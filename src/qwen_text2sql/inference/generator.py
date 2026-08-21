@@ -26,7 +26,10 @@ def load_inference_model(model_id: str, adapter_path: str | Path | None = None) 
         if torch.cuda.is_available() and torch.cuda.is_bf16_supported()
         else torch.float16
     )
-    model = Qwen3_5ForCausalLM.from_pretrained(model_id, device_map="auto", dtype=dtype)
+    # Deliberately Any: the variable holds a Qwen3_5ForCausalLM until an adapter
+    # is attached and a PeftModel afterwards, and PEFT does not declare a common
+    # supertype for the two.
+    model: Any = Qwen3_5ForCausalLM.from_pretrained(model_id, device_map="auto", dtype=dtype)
     if adapter_path is not None:
         from peft import PeftModel
 
