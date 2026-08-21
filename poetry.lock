@@ -2640,7 +2640,7 @@ version = "2.4.6"
 description = "Fundamental package for array computing in Python"
 optional = false
 python-versions = ">=3.11"
-groups = ["main", "notebooks", "quantization"]
+groups = ["main", "dev", "notebooks", "quantization"]
 files = [
     {file = "numpy-2.4.6-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:0280e0356c0829a18d9de1cb7eee50ec22ca639878d7240307ca0943d73cd2c4"},
     {file = "numpy-2.4.6-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:110f8b71aacb688ec69062bb7f6938a0f8acb01b7c1c4beb453c65b6d234584d"},
@@ -3081,6 +3081,21 @@ sql-other = ["SQLAlchemy (>=2.0.36)", "adbc-driver-postgresql (>=1.2.0)", "adbc-
 test = ["hypothesis (>=6.116.0)", "pytest (>=8.3.4,<9.1)", "pytest-xdist (>=3.6.1)"]
 timezone = ["pytz (>=2020.1)"]
 xml = ["lxml (>=5.3.0)"]
+
+[[package]]
+name = "pandas-stubs"
+version = "3.0.5.260730"
+description = "Type annotations for pandas"
+optional = false
+python-versions = ">=3.11"
+groups = ["dev"]
+files = [
+    {file = "pandas_stubs-3.0.5.260730-py3-none-any.whl", hash = "sha256:60e90e3e1eda6937e337e243cbe6217e151c11137cd7eddf832af537c7310bfd"},
+    {file = "pandas_stubs-3.0.5.260730.tar.gz", hash = "sha256:f70a232c57d93a5a2c81f8a53953e10891a5374bc92652277deb325e2e4d0ff3"},
+]
+
+[package.dependencies]
+numpy = ">=1.23.5"
 
 [[package]]
 name = "parso"
@@ -5056,4 +5071,4 @@ quantization = ["bitsandbytes"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11,<3.14"
-content-hash = "7136ff0b127d0956114186dd9f1a6f116c665b3a3a3a21dd26cf9df59dbd18e1"
+content-hash = "8b9be62c9f9c7fdb487a2f775e948352d538997bc27ef848e17216091632559d"

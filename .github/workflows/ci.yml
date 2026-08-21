@@ -57,7 +57,7 @@ jobs:
         # before changing training or inference code.
         run: |
           python -m pip install --upgrade pip
-          python -m pip install "mypy==${MYPY_VERSION}" types-PyYAML numpy pandas matplotlib
+          python -m pip install "mypy==${MYPY_VERSION}" types-PyYAML pandas-stubs numpy pandas matplotlib
           python -m pip install -e . --no-deps
       - name: Mypy (strict)
         run: mypy src/qwen_text2sql

@@ -92,6 +92,20 @@ changes.
 
 ### Fixed
 
+- **Training could not run at all.** `train_adapter` passed `warmup_ratio` to
+  `trl.SFTConfig`, but transformers 5 removed that argument from
+  `TrainingArguments`, so every run raised
+  `TypeError: SFTConfig.__init__() got an unexpected keyword argument
+  'warmup_ratio'` before its first step. The project keeps expressing warmup as a
+  ratio — a fixed step count would make the smallest learning-curve cell spend
+  most of training in warmup and the largest barely warm up, confounding the
+  sweep — and now converts it to `warmup_steps` from the training-set size.
+  The trainer arguments moved into `sft_config_kwargs`, and a test checks every
+  one of them against the installed trl.
+- `mypy --strict` errors that were invisible without the ML stack installed:
+  `PeftModel` assigned to a variable typed as the base model, an untyped
+  `.eval()` call, matplotlib's `rcParams` key typing, and missing `pandas-stubs`.
+
 - Repository-wide lint and formatting violations that made the CI `ruff` step
   fail (23 lint errors across 13 unformatted files).
 - `mypy --strict` failing locally while passing in CI: `peft` re-exports are now
