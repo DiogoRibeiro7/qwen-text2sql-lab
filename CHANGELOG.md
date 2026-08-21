@@ -101,6 +101,14 @@ changes.
   `pipeline.apply_limit`: single definitions of the prediction schema, the
   prediction/example pairing and the limit guard. The scripts and the CLI had
   each reimplemented these, and the copies had drifted; they now delegate.
+- `training.model_load_kwargs`, extracting the precision and quantization
+  choices from `load_qwen_text_model` so they can be checked without a GPU. Those
+  arguments decide what a run *is*: a config that silently loaded in the wrong
+  precision, or quietly skipped quantization, would produce a run labelled QLoRA
+  that was nothing of the sort, and condition C exists to isolate exactly that.
+  The 4-bit branch is covered by simulating CUDA availability. `modeling.py`
+  coverage rises from 49% to 85% and the repository total to 96%; what remains
+  needs a real device.
 - `make format`, `make format-check`, `make build` and `make clean` targets.
 - Committed `poetry.lock` resolving all 109 transitive dependencies, so
   `poetry install` reproduces an identical environment. CI verifies the lock
