@@ -66,6 +66,17 @@ changes.
 
 ### Changed
 
+- CI's automatic triggers disabled, leaving the workflow manual-only. The
+  repository is private, so Actions minutes are billed; with no billing
+  configured every run failed before executing a step, and a permanently red
+  history hides real failures. Restoring the triggers is a two-line change and
+  becomes free if the repository is made public.
+- The CI status badge removed from the README, since it reported a billing
+  condition rather than the state of the code.
+- Added a `make hooks-push` pre-push gate running mypy, the test suite and
+  notebook validation, so the checks CI would have run still happen before code
+  leaves the machine.
+
 - Packaging metadata migrated to PEP 621 (`[project]`), adding classifiers,
   keywords and project URLs. The Poetry build backend is unchanged.
 - CI now runs on Python 3.11, 3.12 and 3.13, checks formatting in addition to

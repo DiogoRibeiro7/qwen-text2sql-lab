@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-.PHONY: help install install-cpu hooks format format-check lint typecheck test test-fast check notebooks validate build clean
+.PHONY: help install install-cpu hooks hooks-push format format-check lint typecheck test test-fast check notebooks validate build clean
 
 POETRY ?= poetry
 RUN    := $(POETRY) run
@@ -15,8 +15,11 @@ install: ## Install all dependencies, including 4-bit quantization support
 install-cpu: ## Install without the quantization group (no CUDA GPU)
 	$(POETRY) install --with dev,notebooks
 
-hooks: ## Install the pre-commit git hooks
+hooks: ## Install the fast pre-commit git hooks
 	$(RUN) pre-commit install
+
+hooks-push: hooks ## Also gate `git push` on mypy, tests and notebook validation
+	$(RUN) pre-commit install --hook-type pre-push
 
 format: ## Apply Ruff formatting and safe lint fixes
 	$(RUN) ruff format $(SOURCES)
