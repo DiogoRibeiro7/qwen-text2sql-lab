@@ -30,6 +30,12 @@ results/checkpoints/*
 !results/checkpoints/.gitkeep
 wandb/
 
+# Stray database artifacts. Databases live under data/ and are never committed;
+# a mistyped path or an ATTACH must not be able to drop one at the repo root.
+*.sqlite
+*.sqlite3
+*.db
+
 # Editor and OS noise
 .idea/
 .vscode/
