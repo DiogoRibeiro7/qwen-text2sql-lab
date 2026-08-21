@@ -1,0 +1,21 @@
+version: 2
+updates:
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels: ["dependencies"]
+    groups:
+      dev-tooling:
+        patterns: ["ruff", "mypy", "pytest*", "pre-commit", "types-*", "nbformat"]
+      ml-stack:
+        patterns: ["torch", "transformers", "trl", "peft", "accelerate", "datasets", "safetensors", "bitsandbytes"]
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    labels: ["dependencies", "ci"]

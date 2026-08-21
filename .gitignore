@@ -4,8 +4,10 @@ __pycache__/
 .mypy_cache/
 .ruff_cache/
 .coverage
+coverage.xml
 htmlcov/
 .venv/
+venv/
 dist/
 build/
 *.egg-info/
@@ -27,3 +29,8 @@ results/checkpoints/*
 !results/predictions/.gitkeep
 !results/checkpoints/.gitkeep
 wandb/
+
+# Editor and OS noise
+.idea/
+.vscode/
+Thumbs.db
