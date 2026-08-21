@@ -152,3 +152,85 @@ def test_the_checker_exits_non_zero_on_a_problem(
 def test_the_checker_exits_zero_when_consistent(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(sys, "argv", ["check_release_metadata.py", "--root", str(REPO)])
     assert checker.main() == 0
+
+
+# --------------------------------------------------------------------------
+# ORCID
+# --------------------------------------------------------------------------
+
+
+def test_the_shipped_orcid_passes_its_check_digit() -> None:
+    payload = json.loads((REPO / ".zenodo.json").read_text(encoding="utf-8"))
+    orcid = payload["creators"][0]["orcid"]
+    assert orcid == "0009-0001-2022-7072"
+    assert checker.orcid_checksum_ok(orcid)
+
+
+def test_the_two_files_state_the_same_orcid() -> None:
+    """Zenodo wants the bare identifier, CFF the resolvable URL; same person."""
+    payload = json.loads((REPO / ".zenodo.json").read_text(encoding="utf-8"))
+    citation = (REPO / "CITATION.cff").read_text(encoding="utf-8")
+    orcid = payload["creators"][0]["orcid"]
+    assert f"https://orcid.org/{orcid}" in citation
+
+
+def test_the_creator_carries_an_affiliation() -> None:
+    payload = json.loads((REPO / ".zenodo.json").read_text(encoding="utf-8"))
+    assert payload["creators"][0]["affiliation"] == "ESMAD - Instituto Politécnico do Porto"
+
+
+def test_creators_carry_no_contributor_role() -> None:
+    """`type` is a `contributors` field in Zenodo's schema, not a `creators` one.
+
+    Left on a creator it is ignored, so the role would silently not be recorded.
+    """
+    payload = json.loads((REPO / ".zenodo.json").read_text(encoding="utf-8"))
+    for creator in payload["creators"]:
+        assert "type" not in creator
+        assert set(creator) <= {"name", "affiliation", "orcid", "gnd"}
+
+
+@pytest.mark.parametrize(
+    "orcid",
+    [
+        pytest.param("0009-0001-2022-7073", id="wrong-check-digit"),
+        pytest.param("0009-0001-2202-7072", id="transposed-digits"),
+        pytest.param("0009-0001-2022", id="too-short"),
+        pytest.param("0009000120227072", id="no-hyphens"),
+        pytest.param("not-an-orcid-here", id="not-numeric"),
+    ],
+)
+def test_a_bad_orcid_is_rejected(orcid: str) -> None:
+    """A transposed digit is a valid-looking identifier belonging to someone else."""
+    assert not checker.orcid_checksum_ok(orcid)
+
+
+def test_an_orcid_ending_in_x_is_accepted() -> None:
+    """The check digit is base-11, so X is a legitimate final character.
+
+    Computed rather than recalled: the well-known example ORCID
+    (0000-0002-1825-0097) ends in 7, and assuming otherwise would make this test
+    assert the checker is broken.
+    """
+    assert checker.ORCID.match("0000-0002-1800-008X")
+    assert checker.orcid_checksum_ok("0000-0002-1800-008X")
+
+
+def test_a_bad_orcid_in_the_deposit_is_caught(repo_copy: Path) -> None:
+    _rewrite(repo_copy / ".zenodo.json", "0009-0001-2022-7072", "0009-0001-2022-7073")
+    problems = checker.check(repo_copy)
+    assert any("check digit" in p for p in problems)
+
+
+def test_an_orcid_disagreement_between_the_files_is_caught(repo_copy: Path) -> None:
+    _rewrite(repo_copy / "CITATION.cff", "0009-0001-2022-7072", "0000-0002-1825-009X")
+    assert any("ORCID disagreement" in p for p in checker.check(repo_copy))
+
+
+def test_a_contributor_role_on_a_creator_is_caught(repo_copy: Path) -> None:
+    """Zenodo ignores `type` on a creator, so the role would vanish silently."""
+    payload = json.loads((repo_copy / ".zenodo.json").read_text(encoding="utf-8"))
+    payload["creators"][0]["type"] = "ProjectLeader"
+    (repo_copy / ".zenodo.json").write_text(json.dumps(payload), encoding="utf-8")
+    problems = checker.check(repo_copy)
+    assert any("contributors" in p for p in problems)

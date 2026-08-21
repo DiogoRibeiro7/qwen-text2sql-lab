@@ -43,8 +43,9 @@ make release-check
 ```
 
 That checks `pyproject.toml`, `CITATION.cff` and `.zenodo.json` agree on version,
-title and licence, that `.zenodo.json` carries the fields Zenodo requires, and
-that the changelog has somewhere for the release to go.
+title, licence and ORCID, that the ORCID passes its check digit, that
+`.zenodo.json` carries the fields Zenodo requires and no keys it would ignore,
+and that the changelog has somewhere for the release to go.
 
 To bump, edit all three, plus `date-released` in `CITATION.cff`, then re-run it.
 
@@ -113,15 +114,33 @@ them from their own sources, which is what
 [`docs/data_contract.md`](data_contract.md) and the README's data section are
 for.
 
-## Adding an ORCID
+## Authorship
 
-`.zenodo.json` currently lists the author by name only. An ORCID makes the
-deposit attributable across name variants and institutions:
+`.zenodo.json` and `CITATION.cff` both carry the author's ORCID and affiliation,
+and `make release-check` verifies they agree — Zenodo wants the bare identifier,
+CFF wants the resolvable URL, and it compares the identifier so the two cannot
+drift apart. It also validates the ORCID's ISO 7064 check digit, because a
+transposed digit produces a syntactically valid identifier belonging to somebody
+else, and a deposit attributing the work to them is permanent.
+
+A note on Zenodo's schema: `creators` entries take `name`, `affiliation`,
+`orcid` and `gnd` only. Roles such as `ProjectLeader` belong to `contributors`,
+which is a separate list with its own `type` vocabulary. A `type` left on a
+creator is ignored rather than rejected, so the role would silently fail to be
+recorded — `make release-check` rejects unknown creator keys for that reason.
+
+To record a role in addition to authorship, add a contributors block:
 
 ```json
-"creators": [
-  {"name": "Ribeiro, Diogo", "orcid": "0000-0000-0000-0000"}
+"contributors": [
+  {
+    "name": "Ribeiro, Diogo",
+    "type": "ProjectLeader",
+    "affiliation": "ESMAD - Instituto Politécnico do Porto",
+    "orcid": "0009-0001-2022-7072"
+  }
 ]
 ```
 
-It is deliberately absent rather than guessed.
+For a single-author deposit this duplicates the creator, so it is worth adding
+only if the role itself matters to how the record should read.

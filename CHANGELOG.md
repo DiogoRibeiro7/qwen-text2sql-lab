@@ -93,7 +93,8 @@ changes.
   that Zenodo cannot archive a private repository and that its toggle must be set
   before the release rather than after, since it does not backfill.
 - `make release-check`, verifying that `pyproject.toml`, `CITATION.cff` and
-  `.zenodo.json` agree on version, title and licence. Zenodo reads the metadata
+  `.zenodo.json` agree on version, title, licence and ORCID, and that the ORCID
+  passes its check digit. Zenodo reads the metadata
   at the instant a release is published and mints a DOI from it, so a version
   stale by one bump is archived permanently and cannot be corrected afterwards.
 - `make format`, `make format-check`, `make build` and `make clean` targets.
