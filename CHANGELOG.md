@@ -87,6 +87,15 @@ changes.
 - `scripts/plan_experiments.py` takes an optional `--config`, so the written plan
   describes the runs the sweep will actually perform rather than the planning
   defaults.
+- `.zenodo.json`, so a GitHub release deposits to Zenodo with the intended
+  title, description, authorship, licence and keywords rather than whatever
+  Zenodo infers. `docs/releasing.md` documents the whole procedure, including
+  that Zenodo cannot archive a private repository and that its toggle must be set
+  before the release rather than after, since it does not backfill.
+- `make release-check`, verifying that `pyproject.toml`, `CITATION.cff` and
+  `.zenodo.json` agree on version, title and licence. Zenodo reads the metadata
+  at the instant a release is published and mints a DOI from it, so a version
+  stale by one bump is archived permanently and cannot be corrected afterwards.
 - `make format`, `make format-check`, `make build` and `make clean` targets.
 - Committed `poetry.lock` resolving all 109 transitive dependencies, so
   `poetry install` reproduces an identical environment. CI verifies the lock

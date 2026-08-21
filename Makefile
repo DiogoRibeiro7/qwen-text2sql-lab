@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-.PHONY: help install install-cpu hooks hooks-push format format-check lint typecheck test test-fast check notebooks validate build clean
+.PHONY: help install install-cpu hooks hooks-push format format-check lint typecheck test test-fast check notebooks validate release-check build clean
 
 POETRY ?= poetry
 RUN    := $(POETRY) run
@@ -44,6 +44,9 @@ check: lint format-check typecheck test ## Run every quality gate CI runs
 
 notebooks: ## Statically validate the notebook sequence
 	$(RUN) python scripts/validate_notebooks.py
+
+release-check: ## Verify pyproject, CITATION.cff and .zenodo.json agree
+	$(RUN) python scripts/check_release_metadata.py
 
 validate: ## Validate the contents of the results directory
 	$(RUN) python scripts/validate_results.py --results-dir results

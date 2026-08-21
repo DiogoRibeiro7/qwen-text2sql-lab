@@ -1,0 +1,27 @@
+{
+  "title": "Qwen Text-to-SQL Lab",
+  "upload_type": "software",
+  "access_right": "open",
+  "license": "mit",
+  "version": "0.1.0",
+  "language": "eng",
+  "creators": [
+    {
+      "name": "Ribeiro, Diogo"
+    }
+  ],
+  "description": "<p>A reproducible research repository for adapting <strong>Qwen3.5-4B</strong> to text-to-SQL with <strong>LoRA</strong> and <strong>QLoRA</strong>, and for measuring whether task-specific fine-tuning produces an improvement that survives scrutiny.</p><p>The repository is built around one question: how much task-specific data and adapter capacity are required before parameter-efficient fine-tuning produces a measurable improvement over the pretrained or post-trained foundation model?</p><p>The primary endpoint is <strong>execution accuracy</strong>. Generated SQL is executed against the target SQLite database and its result set compared with the result of the verified reference query; textual similarity is retained only as a secondary diagnostic, because two very different queries can be equally correct and two near-identical queries can differ in result.</p><p>What the repository provides:</p><ul><li>schema-grounded data preparation from the BIRD benchmark, with stable example identifiers</li><li>database-disjoint train/validation splitting, so no schema appears on both sides</li><li>LoRA and QLoRA adapter training, writing adapter artifacts only</li><li>a read-only SQLite execution sandbox for scoring generated queries</li><li>execution metrics with Wilson confidence intervals, and paired bootstrap comparison between models evaluated on identical examples</li><li>learning-curve and adapter-rank sweeps that hold the remaining training settings fixed</li><li>a notebook sequence that states, for every result, what it does and does not show</li></ul><p>Neither BIRD data nor Qwen model weights are redistributed here; both remain governed by their own licences and terms.</p>",
+  "keywords": [
+    "text-to-SQL",
+    "semantic parsing",
+    "large language models",
+    "parameter-efficient fine-tuning",
+    "LoRA",
+    "QLoRA",
+    "Qwen",
+    "BIRD benchmark",
+    "execution accuracy",
+    "reproducible research"
+  ],
+  "notes": "Code is MIT licensed. The BIRD benchmark releases used here are published under CC BY-SA 4.0, and Qwen3.5 model artifacts under Apache 2.0; neither is redistributed in this archive."
+}
