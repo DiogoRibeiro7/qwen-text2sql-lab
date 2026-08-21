@@ -18,7 +18,7 @@ concurrency:
 env:
   # Pinned so a new tool release cannot turn CI red without a deliberate bump.
   # Dependabot proposes updates to these via the pip ecosystem.
-  RUFF_VERSION: "0.16.1"
+  RUFF_VERSION: "0.16.4"
   MYPY_VERSION: "1.20.2"
   PYTHONUNBUFFERED: "1"
 
@@ -116,6 +116,12 @@ jobs:
         with:
           python-version: "3.11"
           cache: pip
+      - name: Verify the lock file matches pyproject.toml
+        # Guards against editing a dependency constraint without re-locking,
+        # which would silently break `poetry install` reproducibility.
+        run: |
+          python -m pip install --upgrade pip poetry
+          poetry check --lock
       - name: Build sdist and wheel
         run: |
           python -m pip install --upgrade pip build twine

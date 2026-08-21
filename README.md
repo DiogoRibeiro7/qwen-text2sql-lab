@@ -87,7 +87,9 @@ Python 3.11+ is recommended. The project uses Poetry.
 poetry install --with dev,quantization
 ```
 
-For environments without 4-bit CUDA training, omit the quantization group:
+`poetry.lock` is committed, so this resolves to the same versions on every
+machine. For environments without 4-bit CUDA training, omit the quantization
+group:
 
 ```bash
 poetry install --with dev

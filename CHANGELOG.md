@@ -25,6 +25,9 @@ changes.
   endings across editors and platforms.
 - `docs/README.md` index with a suggested reading order.
 - `make format`, `make format-check`, `make build` and `make clean` targets.
+- Committed `poetry.lock` resolving all 109 transitive dependencies, so
+  `poetry install` reproduces an identical environment. CI verifies the lock
+  stays in sync with `pyproject.toml`.
 
 ### Changed
 

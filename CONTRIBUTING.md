@@ -20,6 +20,11 @@ poetry run pre-commit install
 Nothing in the default developer setup downloads model weights or BIRD
 databases. The unit tests build small temporary SQLite databases instead.
 
+`poetry.lock` is committed and resolves the full dependency graph, so every
+machine installs byte-identical versions. If you change a dependency constraint
+in `pyproject.toml`, run `poetry lock` and commit the result in the same change
+— CI fails if the two drift apart.
+
 ## Quality gates
 
 Every change must pass:
