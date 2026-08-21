@@ -114,3 +114,54 @@ def test_dataset_fingerprint_ignores_blank_lines(
 def test_dataset_fingerprint_rejects_a_missing_file(tmp_path: Path) -> None:
     with pytest.raises(context.MissingArtifact):
         context.dataset_fingerprint(tmp_path / "absent.jsonl")
+
+
+# --------------------------------------------------------------------------
+# artifact_root
+# --------------------------------------------------------------------------
+
+
+def test_artifacts_default_to_the_repository() -> None:
+    assert context.artifact_root() == context.project_root()
+
+
+def test_the_environment_can_point_artifacts_elsewhere(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Lets the analysis read a colleague's results, or a synthetic fixture."""
+    monkeypatch.setenv("QWEN_TEXT2SQL_ARTIFACT_ROOT", str(tmp_path))
+    assert context.artifact_root() == tmp_path.resolve()
+    assert context.artifact("lora_records").path.is_relative_to(tmp_path.resolve())
+
+
+def test_the_override_does_not_move_code_or_configuration(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Overriding both would send config lookups somewhere with no configs."""
+    monkeypatch.setenv("QWEN_TEXT2SQL_ARTIFACT_ROOT", str(tmp_path))
+    assert context.project_root() != tmp_path.resolve()
+    assert (context.project_root() / "configs").is_dir()
+
+
+def test_a_dataset_outside_the_artifact_root_is_still_fingerprinted(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """It previously raised `is not in the subpath of`, which broke any dataset
+    held on another volume."""
+    monkeypatch.setenv("QWEN_TEXT2SQL_ARTIFACT_ROOT", str(tmp_path / "elsewhere"))
+    dataset = tmp_path / "rows.jsonl"
+    write_jsonl(dataset, [{"a": 1}, {"a": 2}])
+    fingerprint = context.dataset_fingerprint(dataset)
+    assert fingerprint["rows"] == 2
+    assert str(dataset.resolve()) == fingerprint["path"]
+
+
+def test_a_dataset_inside_the_artifact_root_reports_a_relative_path(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("QWEN_TEXT2SQL_ARTIFACT_ROOT", str(tmp_path))
+    dataset = tmp_path / "data" / "processed" / "rows.jsonl"
+    write_jsonl(dataset, [{"a": 1}])
+    assert context.dataset_fingerprint(dataset)["path"] == str(
+        Path("data") / "processed" / "rows.jsonl"
+    )

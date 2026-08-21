@@ -78,8 +78,9 @@ changes.
   checkpoint is built in memory rather than downloaded, so it runs on CPU in
   about two seconds. It caught the `warmup_ratio` regression during development,
   before the fix had landed on its branch, and it holds the repository to its
-  promise that only adapter artifacts are written. `training/train.py` reaches complete coverage,
-  `training/modeling.py` 10% to 49%, and the repository total to 95%.
+  promise that only adapter artifacts are written. `training/train.py` reaches
+  complete coverage, `training/modeling.py` 10% to 49%, and the repository total
+  to 95%.
 - Tests for the sweep driver, which had none, and `scripts/` is now type checked
   alongside the package by `make typecheck`, CI and the pre-push hook. These are
   the documented entry points for every experiment in the README; every defect
@@ -109,6 +110,13 @@ changes.
   The 4-bit branch is covered by simulating CUDA availability. `modeling.py`
   coverage rises from 49% to 85% and the repository total to 96%; what remains
   needs a real device.
+- Every notebook is now executed against synthetic artifacts in the test suite.
+  `make notebooks` compiles cells; it never ran them, so a cell naming a column
+  the summary lacks would pass every gate and fail only after a sweep that cost
+  hours of GPU time. All ten run to completion.
+- `QWEN_TEXT2SQL_ARTIFACT_ROOT` points the analysis at a `data/` and `results/`
+  tree outside the repository — an archived run, a colleague's results, or a test
+  fixture. Only artifacts move; `project_root` still locates code and configs.
 - `make format`, `make format-check`, `make build` and `make clean` targets.
 - Committed `poetry.lock` resolving all 109 transitive dependencies, so
   `poetry install` reproduces an identical environment. CI verifies the lock
@@ -152,6 +160,11 @@ changes.
   normalisation.
 
 ### Fixed
+
+- **`dataset_fingerprint` raised for any dataset outside the repository.** It
+  computed a path relative to the project root, so `is not in the subpath of`
+  was the result for a dataset held on another volume. Found the first time the
+  notebooks were executed against a fixture tree.
 
 - **Prediction files had two schemas.** `scripts/generate_predictions.py` omitted
   `difficulty` from its rows while `pipeline.generate_and_evaluate` included it,
