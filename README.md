@@ -1,0 +1,303 @@
+# Qwen Text-to-SQL Lab
+
+A reproducible research repository for adapting **Qwen3.5-4B** to text-to-SQL with **LoRA** and **QLoRA**, then evaluating whether task-specific fine-tuning improves executable SQL generation.
+
+The repository is built around one primary question:
+
+> How much task-specific data and adapter capacity are required before parameter-efficient fine-tuning produces a measurable improvement over the pretrained/post-trained foundation model?
+
+The primary endpoint is **execution accuracy**. Generated SQL is executed against the target SQLite database and compared with the result of the verified reference query. Textual SQL equality is retained only as a secondary diagnostic.
+
+## Research design
+
+The core comparisons are:
+
+| ID | Model | Adaptation | Purpose |
+|---|---|---|---|
+| A | `Qwen/Qwen3.5-4B` | none | post-trained foundation-model baseline |
+| B | `Qwen/Qwen3.5-4B` | LoRA SFT | full-precision adapter training |
+| C | `Qwen/Qwen3.5-4B` | QLoRA SFT | memory-efficient 4-bit adapter training |
+| D | `Qwen/Qwen3.5-4B-Base` | LoRA SFT | isolate task adaptation from general post-training |
+
+Two planned ablations are first-class parts of the project:
+
+- training-set size: `250, 500, 1000, 2500, 5000, full` when those sizes are available;
+- LoRA rank: `4, 8, 16, 32, 64`.
+
+All development splits are made **by database**, not by row, to avoid placing identical database schemas in both train and validation partitions.
+
+## Metrics
+
+For example \(i\), let \(\hat q_i\) be the generated query, \(q_i\) the reference query, and \(D_i\) the corresponding database. Execution accuracy is
+
+\[
+\operatorname{EX}=\frac{1}{N}\sum_{i=1}^{N}
+\mathbf{1}\left[R(\hat q_i,D_i)=R(q_i,D_i)\right].
+\]
+
+The implementation also records:
+
+- valid SQL rate;
+- normalized exact-match rate;
+- error category (`syntax_error`, `missing_table`, `missing_column`, timeout, etc.);
+- per-query generation and execution latency;
+- paired bootstrap confidence intervals for differences in execution accuracy.
+
+The local execution comparator treats rows as a multiset and uses a numerical tolerance for floating-point outputs. This is intentionally transparent and inspectable. For leaderboard submissions, use the benchmark's current official evaluator as an additional external check.
+
+## Data
+
+Training metadata uses the filtered BIRD training release:
+
+```text
+birdsql/bird23-train-filtered
+```
+
+The current BIRD development metadata is also supported:
+
+```text
+birdsql/bird_sql_dev_20251106
+```
+
+The Hugging Face datasets contain question/SQL metadata; SQLite databases must also be available locally so schemas can be extracted and predictions can be executed.
+
+Download the official BIRD training database archive:
+
+```bash
+python scripts/download_bird_train.py
+unzip data/raw/bird_train.zip -d data/raw/bird_train
+```
+
+For the revised BIRD dev databases, use the complete database package linked from the official `birdsql/bird_sql_dev_20251106` dataset card and extract it under `data/raw/`.
+
+The project does not redistribute BIRD databases or model weights.
+
+## Installation
+
+Python 3.11+ is recommended. The project uses Poetry.
+
+```bash
+poetry install --with dev,quantization
+```
+
+For environments without 4-bit CUDA training, omit the quantization group:
+
+```bash
+poetry install --with dev
+```
+
+Qwen3.5 text-only support is provided by Transformers through `Qwen3_5ForCausalLM`. The dependency floor in `pyproject.toml` is chosen to include released Qwen3.5 support.
+
+## Prepare BIRD training data
+
+After extracting the databases, locate the directory that contains the database folders/files and run:
+
+```bash
+poetry run qwen-text2sql prepare-bird \
+  --dataset birdsql/bird23-train-filtered \
+  --split train \
+  --db-root data/raw/bird_train/train_databases \
+  --output data/processed/bird_train_all.jsonl
+```
+
+Then create a database-disjoint development split:
+
+```bash
+poetry run qwen-text2sql split \
+  --input data/processed/bird_train_all.jsonl \
+  --train-output data/processed/bird_train.jsonl \
+  --validation-output data/processed/bird_validation.jsonl \
+  --validation-fraction 0.15 \
+  --seed 42
+```
+
+Each prepared record includes a stable example ID, question, optional evidence, reference SQL, schema text and local database path.
+
+
+## Prepare the revised BIRD development set
+
+After downloading and extracting the database package linked from the official revised BIRD development dataset card:
+
+```bash
+poetry run qwen-text2sql prepare-bird \
+  --dataset birdsql/bird_sql_dev_20251106 \
+  --split dev_20251106 \
+  --db-root data/raw/bird_dev/dev_databases \
+  --output data/processed/bird_dev_20251106.jsonl
+```
+
+Treat this as an external evaluation set: do not choose learning rates, LoRA ranks, decoding settings or stopping rules from its results.
+
+## Foundation-model baseline
+
+Generate SQL before fine-tuning:
+
+```bash
+PYTHONPATH=src poetry run python scripts/generate_predictions.py \
+  --config configs/baseline.yaml \
+  --data data/processed/bird_validation.jsonl \
+  --output results/predictions/baseline_validation.jsonl
+```
+
+Evaluate by execution:
+
+```bash
+PYTHONPATH=src poetry run python scripts/evaluate_predictions.py \
+  --data data/processed/bird_validation.jsonl \
+  --predictions results/predictions/baseline_validation.jsonl \
+  --records-output results/baseline_validation_records.jsonl \
+  --metrics-output results/baseline_validation_metrics.json
+```
+
+## LoRA fine-tuning
+
+```bash
+PYTHONPATH=src poetry run python scripts/train_adapter.py \
+  --config configs/qwen35_4b_lora.yaml \
+  --train-data data/processed/bird_train.jsonl \
+  --validation-data data/processed/bird_validation.jsonl
+```
+
+Only PEFT adapter artifacts are written to the configured checkpoint directory.
+
+Generate adapted predictions:
+
+```bash
+PYTHONPATH=src poetry run python scripts/generate_predictions.py \
+  --config configs/qwen35_4b_lora.yaml \
+  --adapter results/checkpoints/qwen35_4b_lora/adapter \
+  --data data/processed/bird_validation.jsonl \
+  --output results/predictions/lora_validation.jsonl
+```
+
+## QLoRA fine-tuning
+
+The QLoRA configuration loads the text model in 4-bit NF4, prepares it for k-bit training, then trains LoRA parameters over linear modules.
+
+```bash
+PYTHONPATH=src poetry run python scripts/train_adapter.py \
+  --config configs/qwen35_4b_qlora.yaml \
+  --train-data data/processed/bird_train.jsonl \
+  --validation-data data/processed/bird_validation.jsonl
+```
+
+This path requires a compatible CUDA environment and `bitsandbytes`.
+
+## Base vs post-trained comparison
+
+To measure how much of the task comes from general post-training versus task-specific adaptation, repeat the LoRA experiment with:
+
+```text
+configs/qwen35_4b_base_lora.yaml
+```
+
+This gives the decomposition:
+
+\[
+\text{pretraining}\rightarrow\text{general post-training}\rightarrow\text{text-to-SQL adaptation}.
+\]
+
+## Learning curves and rank ablations
+
+Create the planned experiment matrix:
+
+```bash
+PYTHONPATH=src poetry run python scripts/plan_experiments.py \
+  --train-data data/processed/bird_train.jsonl \
+  --output results/experiment_plan.csv
+```
+
+The machine-readable plan prevents silently dropping a training-set size or LoRA rank when results are later aggregated.
+
+Run either sweep end to end with:
+
+```bash
+PYTHONPATH=src poetry run python scripts/run_sweep.py \
+  --kind learning_curve \
+  --config configs/qwen35_4b_qlora.yaml \
+  --train-data data/processed/bird_train.jsonl \
+  --validation-data data/processed/bird_validation.jsonl
+```
+
+Use `--kind rank_ablation` for the adapter-rank experiment. The sweep writes a per-cell checkpoint, predictions, evaluation records, metrics and an incrementally updated summary CSV.
+
+## Statistical model comparison
+
+After evaluating two models on the same examples:
+
+```bash
+PYTHONPATH=src poetry run python scripts/compare_models.py \
+  --first results/baseline_validation_records.jsonl \
+  --second results/lora_validation_records.jsonl \
+  --n-bootstrap 10000 \
+  --seed 42
+```
+
+The paired bootstrap operates on per-example execution success, preserving the paired nature of the benchmark.
+
+## Notebooks
+
+The notebook sequence mirrors the experiment rather than hiding logic inside notebooks:
+
+```text
+00_research_protocol.ipynb
+01_data_audit.ipynb
+02_foundation_model_baseline.ipynb
+03_lora_finetuning.ipynb
+04_qlora_finetuning.ipynb
+05_execution_evaluation.ipynb
+06_error_analysis.ipynb
+07_learning_curves.ipynb
+08_adapter_rank_ablation.ipynb
+09_base_vs_posttrained.ipynb
+```
+
+Reusable implementation lives under `src/`; notebooks orchestrate, inspect and visualize.
+
+## Quality gates
+
+```bash
+make lint
+make typecheck
+make test
+make notebooks
+```
+
+CI intentionally does not download model weights or BIRD databases. Unit tests build small temporary SQLite databases and verify schema extraction, read-only execution, result equivalence, splitting, formatting, metrics and bootstrap logic.
+
+## Repository structure
+
+```text
+configs/             experiment configurations
+data/                local raw/intermediate/processed data
+notebooks/           notebook-first experiment walkthrough
+results/             metrics, evaluated records and generated predictions
+scripts/             reproducible command-line experiment entry points
+src/qwen_text2sql/   reusable implementation
+tests/               unit and regression tests
+```
+
+## Reproducibility rules
+
+1. Never optimize a decoding or training choice on the final evaluation set.
+2. Keep schema-identical databases out of both sides of an internal train/validation split.
+3. Save configuration, dataset hash, model ID and number of training examples with every training run.
+4. Keep generated predictions and per-example evaluation records, not only aggregate scores.
+5. Compare models on the same examples and report uncertainty for accuracy differences.
+6. Do not claim semantic correctness from SQL text similarity alone.
+7. Treat benchmark annotation errors separately from model errors.
+8. Do not commit downloaded model weights, BIRD databases, generated checkpoints or prediction dumps.
+
+## External references
+
+- Qwen3.5 model: https://huggingface.co/Qwen/Qwen3.5-4B
+- Qwen3.5 base model: https://huggingface.co/Qwen/Qwen3.5-4B-Base
+- Transformers Qwen3.5 implementation: https://github.com/huggingface/transformers/blob/main/docs/source/en/model_doc/qwen3_5.md
+- TRL SFTTrainer: https://huggingface.co/docs/trl/en/sft_trainer
+- PEFT quantization guide: https://huggingface.co/docs/peft/developer_guides/quantization
+- BIRD filtered training data: https://huggingface.co/datasets/birdsql/bird23-train-filtered
+- BIRD revised development data: https://huggingface.co/datasets/birdsql/bird_sql_dev_20251106
+
+## License
+
+Project code is MIT licensed. Qwen model checkpoints and BIRD data remain governed by their own licenses and terms. The BIRD Hugging Face releases used here are published under CC BY-SA 4.0; Qwen3.5 model cards specify Apache 2.0 for the model artifacts.

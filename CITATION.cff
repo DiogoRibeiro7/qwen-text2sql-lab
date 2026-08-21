@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this repository, please cite it."
+title: "Qwen Text-to-SQL Lab"
+type: software
+authors:
+  - family-names: Ribeiro
+    given-names: Diogo
+version: 0.1.0
+date-released: 2026-08-19
+license: MIT
