@@ -1,9 +1,25 @@
 name: CI
 
+# Automatic triggers are intentionally disabled.
+#
+# This repository is private, so Actions minutes are metered against the
+# account's monthly allowance and then billed. With no billing configured, every
+# run fails before a single step executes ("The job was not started because
+# recent account payments have failed or your spending limit needs to be
+# increased"), which turns the whole history red for a reason unrelated to the
+# code and makes a real failure impossible to spot.
+#
+# The gates below are enforced locally instead: `make check` runs exactly this
+# set, and pre-commit runs the fast subset on every commit. See CONTRIBUTING.md.
+#
+# To re-enable, restore the push/pull_request triggers below. That becomes free
+# if the repository is made public, or works as-is once an Actions spending
+# limit is set.
+#
+#   push:
+#     branches: [main]
+#   pull_request:
 on:
-  push:
-    branches: [main]
-  pull_request:
   workflow_dispatch:
 
 # Least privilege by default; no job here needs write access.

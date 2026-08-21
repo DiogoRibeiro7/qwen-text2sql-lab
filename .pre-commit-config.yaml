@@ -1,5 +1,10 @@
 # Fast, dependency-light gates that run on every commit.
-# The full gate set (including mypy) is `make check`; CI runs both.
+#
+# CI's automatic triggers are disabled while this repository is private (see
+# .github/workflows/ci.yml), so these hooks plus `make check` are the only
+# automatic enforcement there is. The slower gates - mypy and the test suite -
+# are registered for the pre-push stage and installed separately by
+# `make hooks-push`, so committing stays fast while pushing is guarded.
 default_language_version:
   python: python3.11
 
@@ -38,3 +43,33 @@ repos:
     rev: 0.8.1
     hooks:
       - id: nbstripout
+
+  # Registered for pre-push only, and installed by `make hooks-push`.
+  # These replace what CI would have caught before code leaves the machine.
+  - repo: local
+    hooks:
+      # `language: system` runs these in whatever environment is active, so
+      # activate the project virtualenv (or use `poetry run pre-commit`) before
+      # pushing. Hard-coding `poetry run` is worse: it resolves binaries from
+      # PATH but `python` from the venv, so the two disagree when the venv is
+      # not fully provisioned.
+      - id: mypy-strict
+        name: mypy --strict
+        entry: mypy src/qwen_text2sql
+        language: system
+        types: [python]
+        pass_filenames: false
+        stages: [pre-push]
+      - id: pytest
+        name: pytest
+        entry: pytest -q
+        language: system
+        pass_filenames: false
+        stages: [pre-push]
+      - id: notebook-validation
+        name: notebooks carry no outputs
+        entry: python scripts/validate_notebooks.py
+        language: system
+        files: \.ipynb$
+        pass_filenames: false
+        stages: [pre-push]
