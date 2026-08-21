@@ -72,6 +72,14 @@ changes.
   shape of test that would have caught the `warmup_ratio` breakage. An audit of
   every transformers, torch and peft call in the inference and model-loading
   paths found no further drift.
+- An end-to-end LoRA training smoke test: `train_adapter` driven against a real
+  Qwen3.5 checkpoint, tokenizer, TRL trainer and PEFT, from prepared JSONL to a
+  saved adapter that is loaded back and used to generate. Nothing is faked; the
+  checkpoint is built in memory rather than downloaded, so it runs on CPU in
+  about two seconds. It caught the `warmup_ratio` regression in
+  development, before the fix had landed on the branch, and it holds the repository to its promise that only adapter
+  artifacts are written. `training/train.py` reaches complete coverage,
+  `training/modeling.py` 10% to 49%, and the repository total to 95%.
 - `make format`, `make format-check`, `make build` and `make clean` targets.
 - Committed `poetry.lock` resolving all 109 transitive dependencies, so
   `poetry install` reproduces an identical environment. CI verifies the lock
