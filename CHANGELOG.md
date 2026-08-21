@@ -66,6 +66,12 @@ changes.
   real against a real SQLite database. `train_adapter` is deliberately not
   covered: faking `datasets`, `peft`, `trl` and the model would leave a test
   that exercises only the mocks.
+- Contract tests driving `generate_sql` through a real `Qwen3_5ForCausalLM`,
+  built from a config in memory so it needs no download and no GPU. The model is
+  real, which is where API drift lives; only the tokenizer is faked. This is the
+  shape of test that would have caught the `warmup_ratio` breakage. An audit of
+  every transformers, torch and peft call in the inference and model-loading
+  paths found no further drift.
 - `make format`, `make format-check`, `make build` and `make clean` targets.
 - Committed `poetry.lock` resolving all 109 transitive dependencies, so
   `poetry install` reproduces an identical environment. CI verifies the lock
