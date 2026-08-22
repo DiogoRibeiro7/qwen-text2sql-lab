@@ -70,6 +70,13 @@ archives nothing.
 
 ### 5. Record the DOI
 
+This repository's DOIs, for reference:
+
+| DOI | Resolves to |
+|---|---|
+| [`10.5281/zenodo.22055163`](https://doi.org/10.5281/zenodo.22055163) | the newest version — cite the project |
+| `10.5281/zenodo.22055164` | v0.2.0 exactly — cite a result |
+
 Zenodo mints two:
 
 | DOI | Resolves to | Use it for |

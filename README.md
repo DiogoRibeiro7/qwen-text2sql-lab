@@ -1,6 +1,7 @@
 # Qwen Text-to-SQL Lab
 
 [![CI](https://github.com/DiogoRibeiro7/qwen-text2sql-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/DiogoRibeiro7/qwen-text2sql-lab/actions/workflows/ci.yml)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22055163.svg)](https://doi.org/10.5281/zenodo.22055163)
 [![Python 3.11 | 3.12 | 3.13](https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13-blue.svg)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
