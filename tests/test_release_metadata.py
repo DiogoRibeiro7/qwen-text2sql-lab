@@ -12,12 +12,18 @@ import importlib.util
 import json
 import shutil
 import sys
+import tomllib
 from pathlib import Path
 from types import ModuleType
 
 import pytest
 
 REPO = Path(__file__).resolve().parents[1]
+
+# Read the version rather than hard-coding it. Hard-coded, these tests break on
+# every release — which is precisely the coupling the checker exists to prevent,
+# and it broke this suite on the 0.2.0 bump.
+CURRENT = tomllib.loads((REPO / "pyproject.toml").read_text(encoding="utf-8"))["project"]["version"]
 
 
 def _load() -> ModuleType:
@@ -82,18 +88,18 @@ def test_the_deposit_does_not_claim_to_contain_data_or_weights() -> None:
 
 def test_a_version_bumped_in_only_one_place_is_caught(repo_copy: Path) -> None:
     """The classic release mistake, and the one Zenodo makes permanent."""
-    _rewrite(repo_copy / "pyproject.toml", 'version = "0.1.0"', 'version = "0.2.0"')
+    _rewrite(repo_copy / "pyproject.toml", f'version = "{CURRENT}"', 'version = "99.9.9"')
     problems = checker.check(repo_copy)
     assert any("version disagreement" in problem for problem in problems)
 
 
 def test_a_stale_zenodo_version_is_caught(repo_copy: Path) -> None:
-    _rewrite(repo_copy / ".zenodo.json", '"version": "0.1.0"', '"version": "0.0.9"')
+    _rewrite(repo_copy / ".zenodo.json", f'"version": "{CURRENT}"', '"version": "0.0.9"')
     assert any("version disagreement" in p for p in checker.check(repo_copy))
 
 
 def test_a_stale_citation_version_is_caught(repo_copy: Path) -> None:
-    _rewrite(repo_copy / "CITATION.cff", "version: 0.1.0", "version: 0.0.9")
+    _rewrite(repo_copy / "CITATION.cff", f"version: {CURRENT}", "version: 0.0.9")
     assert any("version disagreement" in p for p in checker.check(repo_copy))
 
 
@@ -127,9 +133,9 @@ def test_a_creator_without_a_name_is_caught(repo_copy: Path) -> None:
 
 def test_a_non_semver_version_is_caught(repo_copy: Path) -> None:
     for name, old, new in (
-        ("pyproject.toml", 'version = "0.1.0"', 'version = "0.1"'),
-        ("CITATION.cff", "version: 0.1.0", "version: 0.1"),
-        (".zenodo.json", '"version": "0.1.0"', '"version": "0.1"'),
+        ("pyproject.toml", f'version = "{CURRENT}"', 'version = "0.1"'),
+        ("CITATION.cff", f"version: {CURRENT}", "version: 0.1"),
+        (".zenodo.json", f'"version": "{CURRENT}"', '"version": "0.1"'),
     ):
         _rewrite(repo_copy / name, old, new)
     assert any("MAJOR.MINOR.PATCH" in p for p in checker.check(repo_copy))
@@ -144,7 +150,7 @@ def test_the_checker_exits_non_zero_on_a_problem(
     repo_copy: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """`make release-check` has to fail the build, not merely mention it."""
-    _rewrite(repo_copy / "pyproject.toml", 'version = "0.1.0"', 'version = "9.9.9"')
+    _rewrite(repo_copy / "pyproject.toml", f'version = "{CURRENT}"', 'version = "9.9.9"')
     monkeypatch.setattr(sys, "argv", ["check_release_metadata.py", "--root", str(repo_copy)])
     assert checker.main() == 1
 

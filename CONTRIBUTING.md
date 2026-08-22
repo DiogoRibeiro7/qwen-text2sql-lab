@@ -58,27 +58,18 @@ Individually:
 | `make test` | pytest with branch coverage |
 | `make notebooks` | notebooks parse, and carry no stale execution state |
 
-### There is no CI safety net
+### CI and the local hooks
 
-The workflow in [`.github/workflows/ci.yml`](.github/workflows/ci.yml) is
-complete and runs every gate above across Python 3.11-3.13, but **its automatic
-triggers are disabled**. This repository is private, so Actions minutes are
-metered and then billed; with no billing configured, every run failed before
-executing a single step, turning the history red for a reason unrelated to the
-code. A permanently red history hides real failures, so the workflow is
-manual-only (`workflow_dispatch`) until the repository is made public — which
-makes Actions free — or an Actions spending limit is set. Restoring it is a
-two-line change, documented at the top of the file.
-
-Until then, **nothing checks your work except you**. Install both hook stages:
+CI runs every gate above across Python 3.11, 3.12 and 3.13 on each push and pull
+request. The local hooks exist to catch the same problems sooner: waiting for a
+red build to learn about a formatting slip is a poor use of anyone's time.
 
 ```bash
 make hooks-push
 ```
 
 `make hooks` alone installs the fast commit-stage hooks. `make hooks-push` adds a
-pre-push gate running mypy, the test suite and notebook validation — the checks
-CI would otherwise have caught before the code left your machine. They run in
+pre-push gate running mypy, the test suite and notebook validation. They run in
 whatever environment is active, so activate the project virtualenv first, or
 invoke them as `poetry run pre-commit`.
 

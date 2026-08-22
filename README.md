@@ -1,5 +1,6 @@
 # Qwen Text-to-SQL Lab
 
+[![CI](https://github.com/DiogoRibeiro7/qwen-text2sql-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/DiogoRibeiro7/qwen-text2sql-lab/actions/workflows/ci.yml)
 [![Python 3.11 | 3.12 | 3.13](https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13-blue.svg)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
@@ -303,15 +304,10 @@ Individual targets are listed by `make help`. Install the git hooks once with
 | `make test` | pytest with branch coverage |
 | `make notebooks` | every notebook cell compiles and carries no committed outputs |
 
-These gates are enforced **locally**, not by CI. The workflow in
-[`.github/workflows/ci.yml`](.github/workflows/ci.yml) is complete and runs the
-same set across Python 3.11-3.13, but its automatic triggers are disabled: this
-repository is private, so Actions minutes are billed, and without billing
-configured every run fails before executing a step. Rather than leave a
-permanently red history that hides real failures, the workflow is manual-only
-until the repository is made public or an Actions spending limit is set.
-
-So install the hooks and run `make check` before pushing — nothing else will.
+CI runs all of these on Python 3.11, 3.12 and 3.13 for every push and pull
+request, and additionally builds and metadata-checks the distribution. Install
+the hooks with `make hooks-push` so the same checks run before you push rather
+than after.
 
 Neither the local gates nor CI download model weights or BIRD databases. Unit tests build small temporary SQLite databases and verify schema extraction, read-only execution, result equivalence, splitting, formatting, metrics and bootstrap logic.
 

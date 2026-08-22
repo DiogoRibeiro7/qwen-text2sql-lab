@@ -1,6 +1,6 @@
 [project]
 name = "qwen-text2sql-lab"
-version = "0.1.0"
+version = "0.2.0"
 description = "Reproducible LoRA/QLoRA fine-tuning experiments for Qwen3.5 on text-to-SQL."
 readme = "README.md"
 requires-python = ">=3.11,<3.14"
@@ -104,7 +104,15 @@ warn_redundant_casts = true
 # keeps the local run (where the packages *are* installed and ship `py.typed`)
 # from failing on names these libraries re-export without declaring.
 [[tool.mypy.overrides]]
-module = ["datasets.*", "transformers.*", "trl.*", "peft.*", "bitsandbytes.*", "cycler.*"]
+module = [
+  "torch.*",
+  "datasets.*",
+  "transformers.*",
+  "trl.*",
+  "peft.*",
+  "bitsandbytes.*",
+  "cycler.*",
+]
 ignore_missing_imports = true
 implicit_reexport = true
 
