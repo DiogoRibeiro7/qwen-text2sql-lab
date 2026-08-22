@@ -1,10 +1,10 @@
 # Fast, dependency-light gates that run on every commit.
 #
-# CI's automatic triggers are disabled while this repository is private (see
-# .github/workflows/ci.yml), so these hooks plus `make check` are the only
-# automatic enforcement there is. The slower gates - mypy and the test suite -
-# are registered for the pre-push stage and installed separately by
-# `make hooks-push`, so committing stays fast while pushing is guarded.
+# CI runs the full gate set on every push and pull request. These hooks catch
+# the same problems before the push, which is faster than waiting for a red
+# build. The slower gates - mypy and the test suite - are registered for the
+# pre-push stage and installed separately by `make hooks-push`, so committing
+# stays fast while pushing is guarded.
 default_language_version:
   python: python3.11
 

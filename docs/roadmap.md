@@ -22,14 +22,15 @@ research; all of them are currently blocking.
 
 | # | Item | Why it blocks |
 |---|---|---|
-| 0.1 | **Make the repository public, or fund Actions minutes** | CI has never executed a single step. Every run has failed on billing before starting, so the workflow itself is unverified. Actions is free on public repositories. |
-| 0.2 | **Re-enable the CI triggers** | A two-line edit in `.github/workflows/ci.yml`, once 0.1 is resolved. Until then the only gate is `make check` on a developer's machine. |
-| 0.3 | **Enable the Zenodo toggle, then cut `v0.1.0`** | Zenodo cannot archive a private repository, and does not backfill: the toggle must precede the release. See [`releasing.md`](releasing.md). |
+| 0.1 | ~~Make the repository public~~ | **Done.** Actions is free on public repositories, which unblocked 0.2 and 0.3. |
+| 0.2 | ~~Re-enable the CI triggers~~ | **Done.** CI now runs on every push and pull request. |
+| 0.3 | **Enable the Zenodo toggle, then cut a release** | Zenodo does not backfill: the toggle must precede the release, or that version is never archived. See [`releasing.md`](releasing.md). |
 | 0.4 | **First GPU run** | `make install`, `make check`, then a short `train_adapter` on a few hundred examples. The training path is verified end to end on CPU with a synthetic checkpoint, but never against a real one. |
 | 0.5 | **First real BIRD run** | `prepare-bird`, `split`, baseline generation and evaluation. This produces the first genuine numbers and exercises the data contract against real schemas. |
 
-Going public also exposes the commit author email across the whole history,
-which is worth deciding on deliberately rather than discovering.
+Going public exposed the commit author email across the whole history. That is
+now a fact rather than a decision; if it matters, GitHub's `noreply` address
+prevents it recurring on future commits.
 
 ---
 

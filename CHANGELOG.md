@@ -11,6 +11,10 @@ changes.
 
 ## [Unreleased]
 
+Nothing yet.
+
+## [0.2.0] - 2026-08-22
+
 ### Added
 
 - `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md` and this changelog.
@@ -128,6 +132,13 @@ changes.
 
 ### Changed
 
+- **CI runs again.** The repository is public, so Actions minutes are free and
+  the automatic triggers are restored. They had been disabled because every run
+  on a private repository failed on billing before executing a step, which left
+  a permanently red history that would have hidden a real failure. The workflow
+  itself is unchanged. The README badge is back, and the documentation no longer
+  claims the repository is private.
+
 - CI's automatic triggers disabled, leaving the workflow manual-only. The
   repository is private, so Actions minutes are billed; with no billing
   configured every run failed before executing a step, and a permanently red
@@ -239,6 +250,9 @@ changes.
 
 ## [0.1.0] - 2026-08-19
 
+The initial scaffold. Recorded here for continuity; it was never tagged or
+published, so the link below points at the commit rather than a release.
+
 ### Added
 
 - Initial project scaffold: schema-grounded BIRD data preparation,
@@ -248,5 +262,6 @@ changes.
 - Notebook sequence `00`–`09` mirroring the experimental protocol.
 - Research protocol, architecture and data-contract documentation.
 
-[Unreleased]: https://github.com/DiogoRibeiro7/qwen-text2sql-lab/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/DiogoRibeiro7/qwen-text2sql-lab/releases/tag/v0.1.0
+[Unreleased]: https://github.com/DiogoRibeiro7/qwen-text2sql-lab/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/DiogoRibeiro7/qwen-text2sql-lab/releases/tag/v0.2.0
+[0.1.0]: https://github.com/DiogoRibeiro7/qwen-text2sql-lab/commit/1ab3826

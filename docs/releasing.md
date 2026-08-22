@@ -4,20 +4,11 @@ A release of this repository does two things: it tags a state of the code, and i
 deposits that state with [Zenodo](https://zenodo.org), which mints a DOI so the
 work can be cited from a paper.
 
-## Before anything else: Zenodo needs a public repository
+## Zenodo needs a public repository
 
-**Zenodo cannot archive a private repository.** Its GitHub integration reads the
-release tarball through the GitHub API using permissions a private repository
-does not grant, so the toggle for a private repository either does not appear or
-does nothing.
-
-This repository is currently private. Until it is made public, the metadata below
-is prepared and validated but no DOI can be minted. Making it public is the same
-decision that would re-enable CI (see [`.github/workflows/ci.yml`](../.github/workflows/ci.yml)),
-so the two are worth taking together.
-
-Before making it public, note that the commit author email becomes visible in the
-history of every commit.
+Zenodo's GitHub integration reads the release tarball through permissions a
+private repository does not grant, so archiving requires the repository to be
+public. **This repository is public**, so the path below is open.
 
 ## One-time setup
 
@@ -63,7 +54,8 @@ make notebooks
 poetry check --lock
 ```
 
-CI does not run while the repository is private, so this is the only gate.
+CI runs the same gates on every push, but running them locally first avoids
+tagging something a build is about to reject.
 
 ### 4. Tag and publish
 

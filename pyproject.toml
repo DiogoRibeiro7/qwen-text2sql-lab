@@ -1,6 +1,6 @@
 [project]
 name = "qwen-text2sql-lab"
-version = "0.1.0"
+version = "0.2.0"
 description = "Reproducible LoRA/QLoRA fine-tuning experiments for Qwen3.5 on text-to-SQL."
 readme = "README.md"
 requires-python = ">=3.11,<3.14"

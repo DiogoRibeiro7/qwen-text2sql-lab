@@ -14,8 +14,8 @@ authors:
     given-names: Diogo
     orcid: "https://orcid.org/0009-0001-2022-7072"
     affiliation: "ESMAD - Instituto Politécnico do Porto"
-version: 0.1.0
-date-released: 2026-08-19
+version: 0.2.0
+date-released: 2026-08-22
 license: MIT
 repository-code: "https://github.com/DiogoRibeiro7/qwen-text2sql-lab"
 url: "https://github.com/DiogoRibeiro7/qwen-text2sql-lab"
