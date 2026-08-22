@@ -4,6 +4,7 @@
 |---|---|
 | [research_protocol.md](research_protocol.md) | What is being estimated, the primary and secondary endpoints, the experimental controls, the planned ablations, and the conditions under which the hypothesis is *not* supported. |
 | [architecture.md](architecture.md) | How data flows from BIRD metadata through schema extraction, training, generation, execution and statistics — and why ML imports are lazy. |
+| [roadmap.md](roadmap.md) | What is left to do and in what order — the blockers, the work that makes the primary result trustworthy, and the research directions behind it. |
 | [releasing.md](releasing.md) | How to cut a release and archive it with Zenodo for a DOI, and why that needs a public repository. |
 | [data_contract.md](data_contract.md) | The exact fields of a prepared JSONL record, their types and their meaning. |
 

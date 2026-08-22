@@ -117,6 +117,10 @@ changes.
 - `QWEN_TEXT2SQL_ARTIFACT_ROOT` points the analysis at a `data/` and `results/`
   tree outside the repository — an archived run, a colleague's results, or a test
   fixture. Only artifacts move; `project_root` still locates code and configs.
+- `docs/roadmap.md`: what is left to do, ordered by dependency rather than by
+  interest. Records the blockers that stop anything being validated, the work
+  that makes the primary result trustworthy before any new capability is added,
+  and the research directions behind it.
 - `make format`, `make format-check`, `make build` and `make clean` targets.
 - Committed `poetry.lock` resolving all 109 transitive dependencies, so
   `poetry install` reproduces an identical environment. CI verifies the lock

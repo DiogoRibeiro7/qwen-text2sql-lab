@@ -360,7 +360,8 @@ Security vulnerabilities must be reported privately — see
 in order to score it; run evaluation against copies of benchmark databases, never
 against a database holding real data.
 
-Released changes are recorded in [CHANGELOG.md](CHANGELOG.md).
+Released changes are recorded in [CHANGELOG.md](CHANGELOG.md), and planned work
+in [docs/roadmap.md](docs/roadmap.md).
 
 ## Citation
 
