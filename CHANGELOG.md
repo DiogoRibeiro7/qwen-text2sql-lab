@@ -158,6 +158,19 @@ changes.
   pairing would corrupt every reported metric.
 - `evaluate_predictions.py` wrote its metrics file without an explicit encoding,
   the only such write in the repository.
+- **A failed BIRD download left a truncated archive in place.**
+  `scripts/download_bird_train.py` streamed straight to the destination, so a
+  dropped connection — the ordinary failure for a multi-gigabyte transfer — left
+  a plausible-looking archive where a complete one belongs. A partially extracted
+  archive is worse than a failed download: it yields a subset of the databases,
+  so every later split and metric describes less data than it claims to, without
+  saying so. The download now goes to a `.part` file, is checked against
+  `Content-Length`, and only then takes the destination name; nothing survives a
+  failure, including a keyboard interrupt.
+- `download_bird_train.py` accepted any URL scheme `urlopen` understands, so a
+  `file:` URL would have turned the download into a silent local copy. It now
+  takes HTTP(S) only, gained a connection timeout, and accepts an optional
+  `--sha256` to verify the contents.
 
 - **The learning-curve sweep ignored the configured LoRA rank.**
   `scripts/run_sweep.py` called `learning_curve_plan` without passing a rank, so
