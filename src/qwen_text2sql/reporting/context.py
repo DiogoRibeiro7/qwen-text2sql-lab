@@ -16,6 +16,7 @@ both:
 from __future__ import annotations
 
 import importlib.metadata
+import os
 import platform
 import subprocess
 import sys
@@ -30,6 +31,7 @@ __all__ = [
     "Artifact",
     "MissingArtifact",
     "artifact",
+    "artifact_root",
     "dataset_fingerprint",
     "environment_report",
     "preflight",
@@ -58,6 +60,22 @@ class MissingArtifact(FileNotFoundError):
     """
 
 
+def artifact_root() -> Path:
+    """Where the generated ``data/`` and ``results/`` trees live.
+
+    Defaults to the repository, which is where the pipeline writes them. The
+    ``QWEN_TEXT2SQL_ARTIFACT_ROOT`` environment variable points the analysis at a
+    different tree instead — a colleague's results, an archived run, or a
+    synthetic fixture — without copying anything into the working tree.
+
+    Deliberately separate from :func:`project_root`, which locates code and
+    configuration. Overriding both together would send config lookups somewhere
+    that has no configs.
+    """
+    override = os.environ.get("QWEN_TEXT2SQL_ARTIFACT_ROOT")
+    return Path(override).expanduser().resolve() if override else project_root()
+
+
 def project_root() -> Path:
     """Locate the repository root from anywhere beneath it.
 
@@ -80,7 +98,7 @@ class Artifact:
     @property
     def path(self) -> Path:
         """Absolute location of this artifact."""
-        return project_root() / self.relative_path
+        return artifact_root() / self.relative_path
 
     @property
     def exists(self) -> bool:
@@ -263,13 +281,20 @@ def dataset_fingerprint(path: str | Path) -> dict[str, object]:
     Reporting accuracy against "the validation set" is meaningless if the file
     changed between runs. The digest makes that detectable.
     """
-    resolved = Path(path)
+    resolved = Path(path).resolve()
     if not resolved.is_file():
         raise MissingArtifact(f"No dataset at {resolved}")
     with resolved.open("r", encoding="utf-8") as handle:
         rows = sum(1 for line in handle if line.strip())
+    try:
+        # Readable when the dataset sits under the artifact tree, which is the
+        # usual case. A dataset on another volume, or reached through an
+        # overridden artifact root, is reported absolutely rather than raising.
+        display = str(resolved.relative_to(artifact_root()))
+    except ValueError:
+        display = str(resolved)
     return {
-        "path": str(resolved.relative_to(project_root())),
+        "path": display,
         "rows": rows,
         "sha256": sha256_file(resolved),
         "size_mb": round(resolved.stat().st_size / 1_048_576, 3),

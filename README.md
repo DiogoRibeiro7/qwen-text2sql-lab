@@ -276,6 +276,10 @@ Three conventions keep them trustworthy:
 Notebooks 00, 03 and 04 run end to end with no data at all. The rest stop at
 their first missing prerequisite with instructions.
 
+To read a results tree that is not this repository — an archived run, or a
+colleague's — set `QWEN_TEXT2SQL_ARTIFACT_ROOT` to a directory containing `data/`
+and `results/`. Only artifacts move; code and configuration stay put.
+
 ```bash
 poetry install --with dev,notebooks
 poetry run jupyter lab
