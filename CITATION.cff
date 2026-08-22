@@ -17,6 +17,7 @@ authors:
 version: 0.2.0
 date-released: 2026-08-22
 license: MIT
+doi: "10.5281/zenodo.22055163"
 repository-code: "https://github.com/DiogoRibeiro7/qwen-text2sql-lab"
 url: "https://github.com/DiogoRibeiro7/qwen-text2sql-lab"
 keywords:
