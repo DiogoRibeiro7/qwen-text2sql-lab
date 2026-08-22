@@ -104,7 +104,15 @@ warn_redundant_casts = true
 # keeps the local run (where the packages *are* installed and ship `py.typed`)
 # from failing on names these libraries re-export without declaring.
 [[tool.mypy.overrides]]
-module = ["datasets.*", "transformers.*", "trl.*", "peft.*", "bitsandbytes.*", "cycler.*"]
+module = [
+  "torch.*",
+  "datasets.*",
+  "transformers.*",
+  "trl.*",
+  "peft.*",
+  "bitsandbytes.*",
+  "cycler.*",
+]
 ignore_missing_imports = true
 implicit_reexport = true
 
