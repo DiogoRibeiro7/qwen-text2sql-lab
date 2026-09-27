@@ -57,7 +57,8 @@ jobs:
         # before changing training or inference code.
         run: |
           python -m pip install --upgrade pip
-          python -m pip install "mypy==${MYPY_VERSION}" types-PyYAML pandas-stubs numpy pandas matplotlib
+          # NumPy 2.5 stubs use Python 3.12 syntax, while this check targets 3.11.
+          python -m pip install "mypy==${MYPY_VERSION}" types-PyYAML pandas-stubs "numpy<2.5" pandas matplotlib "DataExcept>=1.7,<2"
           python -m pip install -e . --no-deps
       - name: Mypy (strict)
         run: mypy src/qwen_text2sql scripts
@@ -80,7 +81,7 @@ jobs:
         # temporary SQLite databases instead.
         run: |
           python -m pip install --upgrade pip
-          python -m pip install numpy pandas pyyaml pytest pytest-cov matplotlib
+          python -m pip install numpy pandas pyyaml pytest pytest-cov matplotlib "DataExcept>=1.7,<2"
           python -m pip install -e . --no-deps
       - name: Pytest
         run: pytest --cov=qwen_text2sql --cov-report=term-missing --cov-report=xml

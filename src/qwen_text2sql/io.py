@@ -8,11 +8,17 @@ from collections.abc import Iterable, Iterator, Mapping
 from pathlib import Path
 from typing import Any
 
+from dataexcept import DataLoadingError, FileReadError, FileWriteError, wrapping
+
 
 def read_jsonl(path: str | Path) -> Iterator[dict[str, Any]]:
     """Yield dictionaries from a UTF-8 JSONL file."""
     input_path = Path(path)
-    with input_path.open("r", encoding="utf-8") as handle:
+    with (
+        wrapping((OSError, UnicodeError), FileReadError, path=str(input_path)),
+        wrapping(json.JSONDecodeError, DataLoadingError, source=str(input_path)),
+        input_path.open("r", encoding="utf-8") as handle,
+    ):
         for line_number, line in enumerate(handle, start=1):
             if not line.strip():
                 continue
@@ -25,8 +31,12 @@ def read_jsonl(path: str | Path) -> Iterator[dict[str, Any]]:
 def write_jsonl(path: str | Path, rows: Iterable[Mapping[str, Any]]) -> None:
     """Write mappings as deterministic UTF-8 JSONL."""
     output_path = Path(path)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    with output_path.open("w", encoding="utf-8") as handle:
+    with wrapping(OSError, FileWriteError, path=str(output_path.parent)):
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+    with (
+        wrapping((OSError, UnicodeError), FileWriteError, path=str(output_path)),
+        output_path.open("w", encoding="utf-8") as handle,
+    ):
         for row in rows:
             handle.write(json.dumps(dict(row), ensure_ascii=False, sort_keys=True) + "\n")
 
@@ -34,7 +44,11 @@ def write_jsonl(path: str | Path, rows: Iterable[Mapping[str, Any]]) -> None:
 def sha256_file(path: str | Path) -> str:
     """Compute the SHA-256 digest of a file without loading it fully in memory."""
     digest = hashlib.sha256()
-    with Path(path).open("rb") as handle:
+    input_path = Path(path)
+    with (
+        wrapping(OSError, FileReadError, path=str(input_path)),
+        input_path.open("rb") as handle,
+    ):
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()

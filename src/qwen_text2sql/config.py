@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 import yaml
+from dataexcept import DataLoadingError, FileReadError, wrapping
 
 
 @dataclass(frozen=True, slots=True)
@@ -83,7 +84,10 @@ def _require_mapping(value: Any, name: str) -> dict[str, Any]:
 def load_config(path: str | Path) -> ExperimentConfig:
     """Load a YAML experiment file into typed configuration objects."""
     config_path = Path(path)
-    payload = yaml.safe_load(config_path.read_text(encoding="utf-8"))
+    with wrapping((OSError, UnicodeError), FileReadError, path=str(config_path)):
+        config_text = config_path.read_text(encoding="utf-8")
+    with wrapping(yaml.YAMLError, DataLoadingError, source=str(config_path)):
+        payload = yaml.safe_load(config_text)
     root = _require_mapping(payload, "config")
     model = ModelConfig(**_require_mapping(root.get("model", {}), "model"))
     lora = LoraConfigData(**_require_mapping(root.get("lora", {}), "lora"))

@@ -97,6 +97,14 @@ poetry install --with dev
 
 Qwen3.5 text-only support is provided by Transformers through `Qwen3_5ForCausalLM`. The dependency floor in `pyproject.toml` is chosen to include released Qwen3.5 support.
 
+JSONL reads, checksum failures, and configuration file reads raise
+`dataexcept.FileReadError`. JSONL and output metadata writes raise
+`dataexcept.FileWriteError`. Malformed JSONL and YAML raise
+`dataexcept.DataLoadingError`. These errors retain the original exception in
+`original` and as the exception cause. A valid JSONL value that is not an object
+still raises `TypeError` with its line number; configuration validation errors
+remain unchanged.
+
 ## Prepare BIRD training data
 
 After extracting the databases, locate the directory that contains the database folders/files and run:

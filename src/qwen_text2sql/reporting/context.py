@@ -24,6 +24,8 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 
+from dataexcept import FileReadError, wrapping
+
 from qwen_text2sql.io import sha256_file
 
 __all__ = [
@@ -284,7 +286,10 @@ def dataset_fingerprint(path: str | Path) -> dict[str, object]:
     resolved = Path(path).resolve()
     if not resolved.is_file():
         raise MissingArtifact(f"No dataset at {resolved}")
-    with resolved.open("r", encoding="utf-8") as handle:
+    with (
+        wrapping((OSError, UnicodeError), FileReadError, path=str(resolved)),
+        resolved.open("r", encoding="utf-8") as handle,
+    ):
         rows = sum(1 for line in handle if line.strip())
     try:
         # Readable when the dataset sits under the artifact tree, which is the
@@ -293,9 +298,11 @@ def dataset_fingerprint(path: str | Path) -> dict[str, object]:
         display = str(resolved.relative_to(artifact_root()))
     except ValueError:
         display = str(resolved)
+    with wrapping(OSError, FileReadError, path=str(resolved)):
+        size_mb = round(resolved.stat().st_size / 1_048_576, 3)
     return {
         "path": display,
         "rows": rows,
         "sha256": sha256_file(resolved),
-        "size_mb": round(resolved.stat().st_size / 1_048_576, 3),
+        "size_mb": size_mb,
     }

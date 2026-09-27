@@ -8,6 +8,8 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import Any
 
+from dataexcept import FileWriteError, wrapping
+
 from qwen_text2sql.config import ExperimentConfig, TrainingConfig
 from qwen_text2sql.io import read_jsonl, sha256_file
 from qwen_text2sql.pipeline import prepared_from_mapping
@@ -118,7 +120,8 @@ def train_adapter(
         use_rslora=config.lora.use_rslora,
     )
     output_dir = Path(config.training.output_dir)
-    output_dir.mkdir(parents=True, exist_ok=True)
+    with wrapping(OSError, FileWriteError, path=str(output_dir)):
+        output_dir.mkdir(parents=True, exist_ok=True)
     args = SFTConfig(
         **sft_config_kwargs(
             config,
@@ -149,8 +152,10 @@ def train_adapter(
         "config": asdict(config),
         "metrics": train_result.metrics,
     }
-    (output_dir / "run_metadata.json").write_text(
-        json.dumps(metadata, indent=2, sort_keys=True, default=str) + "\n",
-        encoding="utf-8",
-    )
+    metadata_path = output_dir / "run_metadata.json"
+    with wrapping((OSError, UnicodeError), FileWriteError, path=str(metadata_path)):
+        metadata_path.write_text(
+            json.dumps(metadata, indent=2, sort_keys=True, default=str) + "\n",
+            encoding="utf-8",
+        )
     return adapter_dir

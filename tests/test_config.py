@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pytest
+from dataexcept import DataLoadingError, FileReadError
 
 from qwen_text2sql.config import load_config
 
@@ -41,3 +42,18 @@ quantization: {}
     )
     with pytest.raises(ValueError, match="cannot both"):
         load_config(path)
+
+
+def test_config_file_and_yaml_errors_have_context(tmp_path: Path) -> None:
+    missing = tmp_path / "missing.yaml"
+    with pytest.raises(FileReadError) as missing_error:
+        load_config(missing)
+    assert missing_error.value.path == str(missing)
+    assert missing_error.value.original is missing_error.value.__cause__
+
+    malformed = tmp_path / "malformed.yaml"
+    malformed.write_text("model: [\n", encoding="utf-8")
+    with pytest.raises(DataLoadingError) as malformed_error:
+        load_config(malformed)
+    assert malformed_error.value.source == str(malformed)
+    assert malformed_error.value.original is malformed_error.value.__cause__
