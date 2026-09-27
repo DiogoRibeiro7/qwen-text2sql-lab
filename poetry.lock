@@ -1007,6 +1007,18 @@ docs = ["ipython", "matplotlib", "numpydoc", "sphinx"]
 tests = ["pytest", "pytest-cov", "pytest-xdist"]
 
 [[package]]
+name = "dataexcept"
+version = "1.7.0"
+description = "A Python package providing structured, easily-extendable custom exception types."
+optional = false
+python-versions = "<3.15,>=3.10"
+groups = ["main"]
+files = [
+    {file = "dataexcept-1.7.0-py3-none-any.whl", hash = "sha256:2032f07de4305e638e16227ae421fc85cd53ab30aec3433d8362ddb8e327bb39"},
+    {file = "dataexcept-1.7.0.tar.gz", hash = "sha256:62f15f59b2d41d873a6f6260be4d75baf9ba730da53626080590095cc7579ef6"},
+]
+
+[[package]]
 name = "datasets"
 version = "5.0.1"
 description = "HuggingFace community-driven open-source library of datasets"
@@ -5094,4 +5106,4 @@ quantization = ["bitsandbytes"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11,<3.14"
-content-hash = "a12284b3e469f44217772c6715f41129f286798d3556c28b3a223eee8c47acc5"
+content-hash = "867cb1f8a3c5a6a36001f4c3fd34c69d9d665f527199cba6a73160f9fa19c097"

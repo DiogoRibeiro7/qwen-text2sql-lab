@@ -7,6 +7,8 @@ from collections.abc import Iterable, Mapping
 from pathlib import Path
 from typing import Any
 
+from dataexcept import FileWriteError, wrapping
+
 from qwen_text2sql.config import ModelConfig
 from qwen_text2sql.evaluation.evaluator import evaluate_prediction
 from qwen_text2sql.evaluation.metrics import summarize
@@ -134,6 +136,10 @@ def generate_and_evaluate(
     write_jsonl(records_path, (row.to_dict() for row in evaluation_rows))
     metrics = summarize(evaluation_rows)
     metrics_file = Path(metrics_path)
-    metrics_file.parent.mkdir(parents=True, exist_ok=True)
-    metrics_file.write_text(json.dumps(metrics, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    with wrapping(OSError, FileWriteError, path=str(metrics_file.parent)):
+        metrics_file.parent.mkdir(parents=True, exist_ok=True)
+    with wrapping((OSError, UnicodeError), FileWriteError, path=str(metrics_file)):
+        metrics_file.write_text(
+            json.dumps(metrics, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
     return metrics
