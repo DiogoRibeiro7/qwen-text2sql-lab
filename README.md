@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/project-avatar.png" alt="qwen-text2sql-lab project logo" width="160" height="160">
+</p>
+
 # Qwen Text-to-SQL Lab
 
 [![CI](https://github.com/DiogoRibeiro7/qwen-text2sql-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/DiogoRibeiro7/qwen-text2sql-lab/actions/workflows/ci.yml)
