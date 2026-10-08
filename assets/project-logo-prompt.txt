@@ -1,0 +1,7 @@
+Tool: built-in image generation
+
+Use case: logo-brand.
+Asset type: square project logo for qwen-text2sql-lab.
+Project purpose: Reproducible Qwen3.5-4B text-to-SQL experiments with LoRA/QLoRA fine-tuning and execution-accuracy evaluation.
+Design direction: A sculptural origami mark: one pale-lavender speech balloon is folded so its lower half becomes a neat violet relational table with three rows and two columns. A continuous sheet, visibly creased paper, soft diffuse shadows. Pale butter-yellow background, saturated violet interior folds. Clever object transformation, no database cylinder, no letters or symbols in the cells.
+Composition: one finished square image, visually distinctive and readable at 160 pixels, with enough margin for README display. Produce the actual artwork, not a mockup sheet or brand presentation. No watermark. Do not use a navy-and-gold metallic badge aesthetic.
