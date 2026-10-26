@@ -66,7 +66,7 @@ packages = [{ include = "qwen_text2sql", from = "src" }]
 bitsandbytes = ">=0.46"
 
 [tool.poetry.group.notebooks.dependencies]
-matplotlib = ">=3.8"
+matplotlib = ">=3.11.2"
 ipykernel = ">=6.29"
 nbclient = "^0.11.0"
 
